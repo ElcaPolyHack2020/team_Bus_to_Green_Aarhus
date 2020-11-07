@@ -28,7 +28,7 @@ def test(
     n_pedestrians=10,
     sumo_cfg=os.path.join("test_data","rand.sumocfg"),
     network=os.path.join("test_data","rand.net.xml"),
-    bus_depot = ':1_0',
+    bus_depot = '-269',
     gui=False):
 
     if gui:
@@ -45,7 +45,7 @@ def test(
     simulation.run()
 
     score = simulation.get_score()    
-    traci.close()
+    return traci #traci.close()
     return score
 
 def add_pedestrians(seed: int, net_xml_file: str, max_steps: int, n_pedestrians:int):
@@ -126,9 +126,10 @@ class PedestrianWeight:
         self.weight = weight
 
 if __name__ == '__main__':
+
     score = test(
-        ExampleSimulation,
+        FixedNBusesSimulation,
         gui=False,
-        n_pedestrians=10
+        n_pedestrians=20
     )
     print("Score:", score)

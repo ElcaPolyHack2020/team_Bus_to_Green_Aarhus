@@ -34,7 +34,7 @@ class _BaseSimulation:
         """
         pass
 
-    def step(self):
+    def step(self, time):
         """ Things that are done in every step of the simulation
         """
         pass
@@ -42,23 +42,17 @@ class _BaseSimulation:
     def run(self):
         # Initialize our algorithms
         self.setup()
-        for s in range(self.simulation_steps):
+        for time in range(self.simulation_steps):
             # Advance the simulation
             traci.simulationStep()
             # Do the next task
-            self.step()
+            self.step(time)
             # Update the stats that we use for scoring
             self.update_stats()
 
-class HiddenPrints:
-    def __enter__(self):
-        self._original_stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        sys.stdout.close()
-        sys.stdout = self._original_stdout
-
+class _Stage1Scorer(_BaseSimulation):
+    N_BUSES_WEIGHT=1
+    NOT_ARRIVED_WEIGHT=1
 
 
 class _StageScorer(_BaseSimulation):
@@ -123,16 +117,14 @@ class ExampleSimulation(_StageScorer):
             logger.info("Generating bus route {}/{}".format(bus_index, n_pedestrians))
             
             bus_id = f'bus_{bus_index}'
-            bus_index += 1
 
             try:
                 traci.vehicle.add(vehID=bus_id, typeID="BUS_S", routeID="", depart=person.depart + 240.0, departPos=0, departSpeed=0, personCapacity=4)
-                traci.vehicle.setRoute(bus_id, [self.bus_depot_start_edge])
                 
+                traci.vehicle.setRoute(bus_id, [self.bus_depot_start_edge])
                 traci.vehicle.changeTarget(bus_id, person.edge_from)
                 traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_from, pos=person.position_from, laneIndex=1, duration=50, flags=tc.STOP_DEFAULT)
                 
-
                 traci.vehicle.setRoute(bus_id, [person.edge_from])
                 traci.vehicle.changeTarget(bus_id, person.edge_to)
                 traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_to, pos=person.position_to, laneIndex=1, duration=50, flags=tc.STOP_DEFAULT)
@@ -144,4 +136,32 @@ class ExampleSimulation(_StageScorer):
                 raise err
 
         traci.vehicle.subscribe('bus_0', (tc.VAR_ROAD_ID, tc.VAR_LANEPOSITION, tc.VAR_POSITION , tc.VAR_NEXT_STOPS ))
-        
+
+class FixedNBusesSimulation(_Stage1Scorer):
+    N_BUSES = 1
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.deployed_buses = set()
+        self.next_passenger_index = 0
+
+    def setup(self):
+        # Sort passengers by their departure time
+        self.pedestrians = sorted(self.pedestrians, key=lambda x:x.depart)
+
+        for i in range(self.N_BUSES):
+            bus = Bus(f'bus_{i}', self.bus_depot_start_edge, self.bus_depot_end_edge)
+            self.deployed_buses.add(bus)
+
+            pickup_job = PickupJob(self.pedestrians[self.next_passenger_index], bus)
+            pickup_job.start()
+            self.next_passenger_index += 1
+
+    def step(self, time):
+        for bus in self.deployed_buses:
+            bus.step(time)
+            if bus.job is None:
+                if self.next_passenger_index < len(self.pedestrians):
+                    pickup_job = PickupJob(self.pedestrians[self.next_passenger_index], bus)
+                    pickup_job.start()
+                    logger.info(["Picking up", self.next_passenger_index])
+                    self.next_passenger_index += 1

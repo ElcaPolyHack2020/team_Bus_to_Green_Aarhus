@@ -44,9 +44,9 @@ def test(
     simulation = sim_cls(simulation_steps, 0, pedestrians, bus_depot, bus_depot)
     simulation.run()
 
+    score = simulation.get_score()    
     traci.close()
-    return simulation.get_score()    
-
+    return score
 
 def add_pedestrians(seed: int, net_xml_file: str, max_steps: int, n_pedestrians:int):
     pedestrians = generate_random_people(seed=seed, net_xml_file=net_xml_file, max_steps=max_steps,n_pedestrians=n_pedestrians)

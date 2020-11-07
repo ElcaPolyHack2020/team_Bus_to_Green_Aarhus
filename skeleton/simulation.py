@@ -50,20 +50,19 @@ class _BaseSimulation:
 
 class _Stage1Scorer(_BaseSimulation):
     N_BUSES_WEIGHT=1000
-    WAIT_TIME_WEIGHT=1
+    NOT_ARRIVED_WEIGHT=1
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.total_waiting_time = 0
+        self.not_arrived_persons = 0
         self.buses = set()
     
     def update_stats(self):
-        person_ids = traci.person.getIDList()
-        self.total_waiting_time += sum([1 for id in person_ids if traci.person.getStage(id).type == 1])
         self.buses|={id for id in traci.vehicle.getIDList() if id.startswith("bus")}
     
     def get_score(self):
-        return len(self.buses)*self.N_BUSES_WEIGHT + self.total_waiting_time*self.WAIT_TIME_WEIGHT
+        not_arrived = sum([1 for id in traci.person.getIDList() if "Arrived" not in traci.person.getStage(id).description])
+        return len(self.buses)*self.N_BUSES_WEIGHT + not_arrived*self.NOT_ARRIVED_WEIGHT
 
 class _Stage2Scorer(_BaseSimulation):
     N_BUSES_WEIGHT=1000

@@ -138,17 +138,15 @@ class Bus:
                 edgeID=edge,
                 pos=pos,
                 laneIndex=1,
-                duration=10,
+                duration=50,
                 flags=tc.STOP_DEFAULT
             )
             self.current_edge = edge
             self.current_pos = pos
 
         if edge == self.current_edge and pos < self.current_pos:
-            logger.info("set via")
-            traci.vehicle.setVia(self.id, [self.current_edge, self.current_edge])
-            traci.vehicle.changeTarget(self.id, edge)
-            
+            traci.vehicle.moveTo(self.id,edge+"_1",0.1)             
+        
         traci.vehicle.changeTarget(self.id, edge)
         
         logger.info([self.id, self.current_edge, self.current_pos, edge, pos, park, traci.vehicle.getRoute(self.id)])    
@@ -158,7 +156,7 @@ class Bus:
             edgeID=edge,
             pos=pos,
             laneIndex=1,
-            duration=0xdeadbeef if park else 10,
+            duration=0xdeadbeef if park else 50,
             flags=tc.STOP_PARKING if park else tc.STOP_DEFAULT
         )
         self.current_edge = edge
@@ -230,7 +228,7 @@ class ExampleSimulation(_Stage1Scorer):
 
         traci.vehicle.subscribe('bus_0', (tc.VAR_ROAD_ID, tc.VAR_LANEPOSITION, tc.VAR_POSITION , tc.VAR_NEXT_STOPS ))
 
-class FixedNBusesSimulation(_Stage1Scorer):
+class FixedNBusesSimulation(_StageScorer):
     N_BUSES = 1
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -258,3 +256,4 @@ class FixedNBusesSimulation(_Stage1Scorer):
                     pickup_job.start()
                     logger.info(["Picking up", self.next_passenger_index])
                     self.next_passenger_index += 1
+

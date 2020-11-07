@@ -144,8 +144,7 @@ class Bus:
             self.current_edge = edge
             self.current_pos = pos
 
-        
-        if pos < self.current_pos:
+        if edge == self.current_edge and pos < self.current_pos:
             logger.info("set via")
             traci.vehicle.setVia(self.id, [self.current_edge, self.current_edge])
             traci.vehicle.changeTarget(self.id, edge)

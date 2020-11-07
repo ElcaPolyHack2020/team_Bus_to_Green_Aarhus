@@ -76,6 +76,7 @@ class _Stage2Scorer(_BaseSimulation):
     def update_stats(self):
         person_ids = traci.person.getIDList()
         self.total_waiting_time += sum([1 for id in person_ids if traci.person.getStage(id).type == 1])
+        self.total_waiting_time += sum([1 for id in person_ids if traci.person.getStage(id).type == 1])
         self.buses|={id for id in traci.vehicle.getIDList() if id.startswith("bus")}
     
     def get_score(self):

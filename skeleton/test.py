@@ -132,4 +132,6 @@ if __name__ == '__main__':
         gui=True,
         n_pedestrians=20
     )
-    print("Score:", score)
+    print("Score Level 1:", score[0])
+    print("Score Level 2:", score[1])
+    print("Score Level 3:", score[2])

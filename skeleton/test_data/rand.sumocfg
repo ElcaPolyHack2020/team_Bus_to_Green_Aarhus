@@ -20,4 +20,11 @@
         <no-step-log value="true"/>
     </report>
 
+    <additional>
+        <vTypeProbe id="probe1" type="BUS_S" freq="10" file="../logs/bus_s.xml"/>
+        <vTypeProbe id="probe2" type="BUS_M" freq="10" file="../logs/bus_m.xml"/>
+        <vTypeProbe id="probe3" type="BUS_L" freq="10" file="../logs/bus_l.xml"/>
+    </additional>
+
+
 </configuration>

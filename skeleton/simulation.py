@@ -6,10 +6,10 @@ import logging
 
 logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 logger = logging.getLogger('simulation')
 
-class Simulation:
+class _BaseSimulation:
     def __init__(self, simulation_steps, sleep_time, pedestrians, bus_depot_start_edge, bus_depot_end_edge):
         self.simulation_steps = simulation_steps
         self.sleep_time = sleep_time
@@ -17,8 +17,58 @@ class Simulation:
         self.bus_depot_start_edge = bus_depot_start_edge
         self.bus_depot_end_edge = bus_depot_end_edge
 
+    def update_stats(self):
+        """ Update our statistics that we use to determine the score
+        """
+        raise NotImplementedError("Please Implement this method")
+
+    def get_score(self):
+        """ Get a score based on the currently available statistics
+        """
+        raise NotImplementedError("Please Implement this method")
+
+    def init(self):
+        """ Things that only have to be done once for that simulation
+        """
+        pass
+
+    def step(self):
+        """ Things that are done in every step of the simulation
+        """
+        pass
+
     def run(self):
-        # Create a bus for the persons
+        # Initialize our algorithms
+        self.init()
+        for step in range(self.simulation_steps):
+            # Advance the simulation
+            traci.simulationStep()
+            # Do the next task
+            self.step()
+            # Update the stats that we use for scoring
+            self.update_stats()
+
+class _Stage1Scorer(_BaseSimulation):
+    N_BUSES_WEIGHT=1000
+    WAIT_TIME_WEIGHT=1
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.total_waiting_time = 0
+        self.buses = set()
+    
+    def update_stats(self):
+        person_ids = traci.person.getIDList()
+        self.total_waiting_time += sum([1 for id in person_ids if traci.person.getStage(id).type == 1])
+        self.buses|={id for id in traci.vehicle.getIDList() if id.startswith("bus")}
+    
+    def get_score(self):
+        return len(self.buses)*self.N_BUSES_WEIGHT + self.total_waiting_time*self.WAIT_TIME_WEIGHT
+
+class ExampleSimulation(_Stage1Scorer):
+    """ The example simulation provided by ELCA
+    """
+    def init(self):
         n_pedestrians = len(self.pedestrians)
         for bus_index, person in enumerate(self.pedestrians):
             logger.info("Generating bus route {}/{}".format(bus_index, n_pedestrians))
@@ -45,13 +95,4 @@ class Simulation:
                 raise err
 
         traci.vehicle.subscribe('bus_0', (tc.VAR_ROAD_ID, tc.VAR_LANEPOSITION, tc.VAR_POSITION , tc.VAR_NEXT_STOPS ))
-
-        step = 0
-        while step <= self.simulation_steps:
-            traci.simulationStep()
-            if self.sleep_time > 0: 
-                sleep(self.sleep_time)
-            step += 1
-            #print(traci.vehicle.getSubscriptionResults('bus_0'))
-
-        traci.close()
+        

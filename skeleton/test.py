@@ -19,7 +19,7 @@ else:
 # Load traci
 import traci
 import traci.constants as tc
-from simulation import Simulation
+from simulation import *
 
 def test(
     sim_cls,
@@ -41,9 +41,11 @@ def test(
 
     pedestrians = add_pedestrians(seed=seed, net_xml_file=network, max_steps=simulation_steps, n_pedestrians=n_pedestrians)
 
-    simulation = Simulation(simulation_steps, 0, pedestrians, bus_depot, bus_depot)
+    simulation = sim_cls(simulation_steps, 0, pedestrians, bus_depot, bus_depot)
     simulation.run()
-    
+
+    traci.close()
+    return simulation.get_score()    
 
 
 def add_pedestrians(seed: int, net_xml_file: str, max_steps: int, n_pedestrians:int):
@@ -72,7 +74,7 @@ with open(os.path.join("test_data","lastnames.txt")) as f:
     last_names = [name.strip() for name in f.readlines()]
 
 def random_name(persId):
-    h = hash(persId)
+    h = hash(str(persId))
     first_name = first_names[h%len(first_names)]
     last_name = last_names[(h%(len(first_names)*len(last_names)))//len(first_names)]
     return "{} {}".format(first_name, last_name)
@@ -100,7 +102,7 @@ def generate_random_people(seed: int, net_xml_file: str, max_steps: int, n_pedes
         pos1 = random.uniform(len1 * 0.4, len1 * 0.6)
         pos2 = random.uniform(len2 * 0.4, len2 * 0.6)
         
-        depart = random.randint(0, max_steps)
+        depart = random.randint(0, max_steps//2)
         
         person = Person(f'{random_name(i)} ({i})', edge1.attrib['id'], edge2.attrib['id'], pos1, pos2, depart)
         people.append(person)
@@ -124,8 +126,9 @@ class PedestrianWeight:
         self.weight = weight
 
 if __name__ == '__main__':
-    test(
-        Simulation,
+    score = test(
+        ExampleSimulation,
         gui=False,
-        n_pedestrians=100
+        n_pedestrians=10
     )
+    print("Score:", score)

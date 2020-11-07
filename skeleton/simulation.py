@@ -108,7 +108,101 @@ class _StageScorer(_BaseSimulation):
         
         return (stage1, stage2, stage3)
 
-class ExampleSimulation(_StageScorer):
+class Bus:
+    def __init__(self, id, start_edge, end_edge, type="BUS_S"):
+        self.id = id
+        self.start_edge=start_edge
+        self.end_edge=end_edge
+        self.current_edge=start_edge
+        self.current_pos=0
+        self.job = None
+        self.parked = False
+        traci.vehicle.add(
+            vehID=self.id,
+            typeID="BUS_S",
+            routeID="",
+            depart=0,
+            departPos=0,
+            departSpeed=0,
+            personCapacity=4
+        )
+    
+    def go_to(self, edge, pos, park=False):
+        if self.parked:
+            # "Wake up"
+            logger.info([self.id, self.current_edge, self.current_pos, edge, pos, park])
+            n_stops = traci.vehicle.getStops(self.id)
+            traci.vehicle.replaceStop(
+                self.id,
+                len(n_stops)-1,
+                edgeID=edge,
+                pos=pos,
+                laneIndex=1,
+                duration=10,
+                flags=tc.STOP_DEFAULT
+            )
+            self.current_edge = edge
+            self.current_pos = pos
+
+        
+        if pos < self.current_pos:
+            logger.info("set via")
+            traci.vehicle.setVia(self.id, [self.current_edge, self.current_edge])
+            traci.vehicle.changeTarget(self.id, edge)
+            
+        traci.vehicle.changeTarget(self.id, edge)
+        
+        logger.info([self.id, self.current_edge, self.current_pos, edge, pos, park, traci.vehicle.getRoute(self.id)])    
+    
+        traci.vehicle.setStop(
+            self.id,
+            edgeID=edge,
+            pos=pos,
+            laneIndex=1,
+            duration=0xdeadbeef if park else 10,
+            flags=tc.STOP_PARKING if park else tc.STOP_DEFAULT
+        )
+        self.current_edge = edge
+        self.current_pos = pos
+        self.parked = park
+
+    def set_job(self, job):
+        if self.job is not None:
+            raise ValueError("Already busy")
+        else:
+            self.job = job
+    
+    
+    def step(self, time):
+        if self.job is not None:
+            self.job.step(time)
+            if self.job.done:
+                self.job = None
+
+class PickupJob:
+    STOP_DURATION = 10
+    def __init__(self, passenger, bus):
+        self.passenger = passenger
+        self.bus = bus
+        self.bus.set_job(self)
+        self.picked_up = False
+        self.done=False
+
+    def start(self):
+        self.bus.go_to(self.passenger.edge_from, self.passenger.position_from, park=True)
+
+    def step(self, time):
+        if self.picked_up:
+            if traci.vehicle.getPersonNumber(self.bus.id) == 0:
+                self.done = True
+            pass
+        elif traci.vehicle.isStopped(self.bus.id) and time >= self.passenger.depart:
+            self.picked_up = True
+            self.bus.go_to(self.passenger.edge_from, self.passenger.position_from)
+            self.bus.go_to(self.passenger.edge_to, self.passenger.position_to)
+            self.bus.go_to(self.passenger.edge_to, self.passenger.position_to, park=True)
+
+class ExampleSimulation(_Stage1Scorer):
     """ The example simulation provided by ELCA
     """
     def setup(self):

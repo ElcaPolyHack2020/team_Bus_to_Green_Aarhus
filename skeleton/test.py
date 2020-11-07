@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
     score = test(
         FixedNBusesSimulation,
-        gui=False,
+        gui=True,
         n_pedestrians=20
     )
     print("Score:", score)

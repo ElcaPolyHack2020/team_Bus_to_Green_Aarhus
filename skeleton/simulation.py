@@ -27,21 +27,22 @@ class Simulation:
             bus_index += 1
 
             try:
-                traci.vehicle.add(vehID=bus_id, typeID="BUS_S", routeID="", depart=person.depart + 240.0, departPos=0, departSpeed=0, departLane=0, personCapacity=4)
+                traci.vehicle.add(vehID=bus_id, typeID="BUS_S", routeID="", depart=person.depart + 240.0, departPos=0, departSpeed=0, personCapacity=4)
                 traci.vehicle.setRoute(bus_id, [self.bus_depot_start_edge])
                 
                 traci.vehicle.changeTarget(bus_id, person.edge_from)
-                traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_from, pos=person.position_from, laneIndex=0, duration=50, flags=tc.STOP_DEFAULT)
+                traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_from, pos=person.position_from, laneIndex=1, duration=50, flags=tc.STOP_DEFAULT)
                 
 
                 traci.vehicle.setRoute(bus_id, [person.edge_from])
                 traci.vehicle.changeTarget(bus_id, person.edge_to)
-                traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_to, pos=person.position_to, laneIndex=0, duration=50, flags=tc.STOP_DEFAULT)
+                traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_to, pos=person.position_to, laneIndex=1, duration=50, flags=tc.STOP_DEFAULT)
 
             except traci.exceptions.TraCIException as err:
                 print("TraCIException: {0}".format(err))
-            except:
+            except Exception as err:
                 print("Unexpected error:", sys.exc_info()[0])
+                raise err
 
         traci.vehicle.subscribe('bus_0', (tc.VAR_ROAD_ID, tc.VAR_LANEPOSITION, tc.VAR_POSITION , tc.VAR_NEXT_STOPS ))
 

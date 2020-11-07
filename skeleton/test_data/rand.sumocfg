@@ -16,7 +16,7 @@
     </gui_only>
 
     <report>
-        <verbose value="true"/>
+        <verbose value="false"/>
         <no-step-log value="true"/>
     </report>
 

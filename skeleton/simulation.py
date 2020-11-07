@@ -2,6 +2,12 @@ from time import sleep
 import sys
 import traci
 import traci.constants as tc
+import logging
+
+logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
+logger = logging.getLogger('simulation')
 
 class Simulation:
     def __init__(self, simulation_steps, sleep_time, pedestrians, bus_depot_start_edge, bus_depot_end_edge):
@@ -13,8 +19,10 @@ class Simulation:
 
     def run(self):
         # Create a bus for the persons
-        bus_index = 0
-        for person in self.pedestrians:
+        n_pedestrians = len(self.pedestrians)
+        for bus_index, person in enumerate(self.pedestrians):
+            logger.info("Generating bus route {}/{}".format(bus_index, n_pedestrians))
+            
             bus_id = f'bus_{bus_index}'
             bus_index += 1
 

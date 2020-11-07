@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- generated on 2020-11-07 13:25:23.293496 by $Id$ v1_7_0+0731-f5102a459b
+  options: -n rand.net.xml -o rand.rou.xml <doubleminus>period 3 -e 60
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <trip id="0" depart="0.00" from="11" to="-101"/>
+    <trip id="1" depart="3.00" from="-307" to="-410"/>
+    <trip id="2" depart="6.00" from="31" to="287"/>
+    <trip id="3" depart="9.00" from="7" to="-13"/>
+    <trip id="4" depart="12.00" from="-56" to="-101"/>
+    <trip id="5" depart="15.00" from="-283" to="11"/>
+    <trip id="6" depart="18.00" from="-101" to="-39"/>
+    <trip id="7" depart="21.00" from="13" to="130"/>
+    <trip id="8" depart="24.00" from="-283" to="167"/>
+    <trip id="9" depart="27.00" from="48" to="-100"/>
+    <trip id="10" depart="30.00" from="43" to="3"/>
+    <trip id="11" depart="33.00" from="-410" to="-3"/>
+    <trip id="12" depart="36.00" from="9" to="-70"/>
+    <trip id="13" depart="39.00" from="-13" to="-130"/>
+    <trip id="14" depart="42.00" from="52" to="173"/>
+    <trip id="15" depart="45.00" from="48" to="31"/>
+    <trip id="16" depart="48.00" from="-9" to="96"/>
+    <trip id="17" depart="51.00" from="-48" to="130"/>
+    <trip id="18" depart="54.00" from="5" to="276"/>
+    <trip id="19" depart="57.00" from="56" to="161"/>
+</routes>

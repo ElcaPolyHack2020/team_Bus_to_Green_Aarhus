@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on So 01 Nov 2020 21:52:18 by Eclipse SUMO netedit Version v1_7_0+0731-f5102a459b
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <sumo-net-file value="data/rand.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="data/rand.net.xml"/>
+    </output>
+
+    <processing>
+        <geometry.min-radius.fix.railways value="false"/>
+        <geometry.max-grade.fix value="false"/>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="false"/>
+    </processing>
+
+    <junctions>
+        <no-internal-links value="false"/>
+        <no-turnarounds value="true"/>
+        <junctions.corner-detail value="5"/>
+        <junctions.limit-turn-speed value="5.5"/>
+        <rectangular-lane-cut value="false"/>
+    </junctions>
+
+    <pedestrian>
+        <walkingareas value="true"/>
+    </pedestrian>
+
+    <netedit>
+        <additional-files value="/home/pascal/Programming/PolyHack20/coding/random_test/data/rand.add.xml"/>
+    </netedit>
+
+    <report>
+        <aggregate-warnings value="5"/>
+    </report>
+
+</configuration>
+-->
+
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+    <busStop id="busstop1" lane="-33_1" startPos="38.53" endPos="48.53"/>
+    <busStop id="busstop2" lane="-33_1" startPos="194.84" endPos="204.84"/>
+    <busStop id="busstop3" lane="-3_1" startPos="95.94" endPos="105.94"/>
+</additional>

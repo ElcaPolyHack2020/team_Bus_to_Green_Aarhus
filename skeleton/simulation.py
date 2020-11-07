@@ -3,6 +3,8 @@ import sys
 import traci
 import traci.constants as tc
 import logging
+import os
+
 
 logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
@@ -48,9 +50,19 @@ class _BaseSimulation:
             # Update the stats that we use for scoring
             self.update_stats()
 
+class HiddenPrints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
+
+
 
 class _StageScorer(_BaseSimulation):
-    N_BUSES_WEIGHT=1000
+    N_BUSES_WEIGHT=1
     WAIT_TIME_WEIGHT=1
     NOT_ARRIVED_WEIGHT=1
     DRIVEN_DISTANCE_WEIGHT=1
@@ -60,29 +72,25 @@ class _StageScorer(_BaseSimulation):
         self.total_waiting_time = 0
         self.buses = set()
         self.distance_dict = dict()
+
     
     def update_stats(self):
         person_ids = traci.person.getIDList()
         self.total_waiting_time += sum([1 for id in person_ids if traci.person.getStage(id).type == 1])
         self.buses |= {id for id in traci.vehicle.getIDList() if id.startswith("bus")}
 
-        for id in list(self.buses):
+        for id in [id for id in traci.vehicle.getIDList() if id.startswith("bus")]:
             new_dist = 0
+            vehicle_id = None
             try: 
                 new_dist = traci.vehicle.getDistance(id)
-            except:
-                pass
-
-            vehicle_id = None
-            try:
                 vehicle_id = traci.vehicle.getTypeID(id)
             except:
                 pass
 
             if id in self.distance_dict:
                 self.distance_dict[id] = (max(self.distance_dict[id][0], new_dist), vehicle_id if self.distance_dict[id][1]==None else self.distance_dict[id][1])
-            else:
-                
+            else:     
                 self.distance_dict[id] = (new_dist, vehicle_id)
 
 
@@ -93,7 +101,6 @@ class _StageScorer(_BaseSimulation):
         buses_l = 0
 
         for dist_vehicle in self.distance_dict.values():
-            print(dist_vehicle[0], dist_vehicle[1])
             if dist_vehicle[1] =="BUS_L":
                 driven_distance_l += dist_vehicle[0]
                 buses_l += 1

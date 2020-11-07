@@ -20,14 +20,14 @@ class _BaseSimulation:
     def update_stats(self):
         """ Update our statistics that we use to determine the score
         """
-        raise NotImplementedError("Please Implement this method")
+        pass
 
     def get_score(self):
         """ Get a score based on the currently available statistics
         """
-        raise NotImplementedError("Please Implement this method")
+        pass
 
-    def init(self):
+    def setup(self):
         """ Things that only have to be done once for that simulation
         """
         pass
@@ -39,8 +39,8 @@ class _BaseSimulation:
 
     def run(self):
         # Initialize our algorithms
-        self.init()
-        for step in range(self.simulation_steps):
+        self.setup()
+        for s in range(self.simulation_steps):
             # Advance the simulation
             traci.simulationStep()
             # Do the next task
@@ -65,10 +65,27 @@ class _Stage1Scorer(_BaseSimulation):
     def get_score(self):
         return len(self.buses)*self.N_BUSES_WEIGHT + self.total_waiting_time*self.WAIT_TIME_WEIGHT
 
+class _Stage2Scorer(_BaseSimulation):
+    N_BUSES_WEIGHT=1000
+    WAIT_TIME_WEIGHT=1
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.total_waiting_time = 0
+        self.buses = set()
+    
+    def update_stats(self):
+        person_ids = traci.person.getIDList()
+        self.total_waiting_time += sum([1 for id in person_ids if traci.person.getStage(id).type == 1])
+        self.buses|={id for id in traci.vehicle.getIDList() if id.startswith("bus")}
+    
+    def get_score(self):
+        return len(self.buses)*self.N_BUSES_WEIGHT + self.total_waiting_time*self.WAIT_TIME_WEIGHT
+
 class ExampleSimulation(_Stage1Scorer):
     """ The example simulation provided by ELCA
     """
-    def init(self):
+    def setup(self):
         n_pedestrians = len(self.pedestrians)
         for bus_index, person in enumerate(self.pedestrians):
             logger.info("Generating bus route {}/{}".format(bus_index, n_pedestrians))

@@ -369,6 +369,7 @@ class FixedNBusesSimulation(_StageScorer):
 class OptimizedFixedNBusesSimulation(FixedNBusesSimulation):
     """Deploys N Buses, chooses closest passenger next
     """
+    DEPARTURE_WEIGHT=40
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.reserved_pedestrians = set()
@@ -384,9 +385,9 @@ class OptimizedFixedNBusesSimulation(FixedNBusesSimulation):
                     best_p = None
                     for p in self.pedestrians:
                         if p.id in pedestrians and p.id not in self.reserved_pedestrians and "waiting" in traci.person.getStage(p.id).description:
-                            distance=bus.get_distance(p.edge_from, p.position_from)
-                            if best_distance is None or 0 <= distance < best_distance:
-                                best_distance = distance
+                            distance=bus.get_distance(p.edge_from, p.position_from) - p.depart * DEPARTURE_WEIGHT
+                            if best_distance is None or -100000 <= distance < best_distance:
+                                best_distance = distance 
                                 best_p = p
                     if best_distance is not None:
                         print("Best", best_distance, best_p.id, bus.id)

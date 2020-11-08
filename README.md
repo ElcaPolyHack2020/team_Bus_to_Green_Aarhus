@@ -44,7 +44,7 @@ This is a little test project I created that generates random cityscapes with ca
 This is a script that tests our submission on the full Aarhus map, while still running our evaluation and returning a nice score.
 
 ## Results
-We achieved the best performance on our own tests was achieved with our `OptimizedFixedNBusesSimulation` solution when using 28 buses. The total waiting time for 3 hours of simulation was just 12 hours, which means that on average only around four passengers were waiting for a bus at any given time. A collection of our results and measurements can be found in the [results](results) folder. They are the not quite polished versions of our tests, of which we show a best-of in our **WatchMe** video.
+We achieved the best performance on our own tests was achieved with our `OptimizedFixedNBusesSimulation` solution when using 28 buses. The total waiting time for 3 hours of simulation was just 12 hours, which means that on average only around four passengers were waiting for a bus at any given time. A collection of our results and measurements can be found in the [results](results) folder. They are the not quite polished versions of our tests, of which we show a best-of in our **[WatchMe](#WatchMe)** video.
 
 ![Bus occupancy](results/bus-occupancy.png)  
 *The occupancy of our buses on a test with 48 instances. Note that our optimal solution only uses 28 agents, which in turn have a much higher occupancy.*

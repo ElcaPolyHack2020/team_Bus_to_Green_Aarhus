@@ -7,6 +7,7 @@ First and foremost, you should enjoy our "WatchMe" of this repository. A short a
 
 # WebApp
 We decided the best way to show the magnitude of the problem is through an interactive Web App, where we show our results. This can be found at https://aarhus-mobility.herokuapp.com/
+![WebApp Screenshot](results/webapp.png)
 
 ## Files
 ## [simulation.py](simulation.py)
@@ -16,7 +17,8 @@ This is the heart of our project, the agent that steers the buses around the str
 - `ExampleSimulation`: This is the simulation that was given to us as an Example by ELCA, rewritten to mach our class format. It was a good way for having a first Idea of how to interact with SUMO.
 - `BusJob`: Our buses can have a queue of tasks(=jobs), that they perform. This is the base class for such a task, which is implemented by the following tasks
 - `MoveTo`: This moves the bus to a given edge at a given position. It is "smart" in a way that it can also go to locations that are not downstream of the current location by rerouting the bus around corners and dead ends.
-- `MoveTo`: This moves the bus to a given edge at a given position. It is "smart" in a way that it can also go to locations that are not downstream of the current location by rerouting the bus around corners and dead ends.
+- `MoveTo`: This moves the bus to a given edge at a given position. It is "smart" in a way that it can also go to locations that are not downstream of the current location by rerouting the bus around corners and dead ends.  
+![Bus Deadend](results/bus.gif)
 - `IDLE`: This tells our bus to park on the side of the road. That way the bus does not produce any emissions and cars can still pass. We do that whenever we don't have anything else to do.
 - `DropOff`: This drops a passenger off if the bus is at the correct location and a passenger is on the bus.
 - `PickUp`: This will pick up a passenger at the given location by indicating that we are going to stop where he wants to go.
@@ -39,3 +41,10 @@ This is a script that tests our submission on the full Aarhus map, while still r
 
 ## Results
 A collection of our results and measurements can be found in the [results](results) folder. They are the not quite polished versions of our tests, of which we show a best-of in our **WatchMe** video.
+
+![Passenger Status](results/passenger-status.png)  
+*The distribution of passenger statuses, from which we can see how the average waiting time was even slightly lower than the riding time, which is another indication of our fast pickups, which are possible through our agents anticipating the location of future passengers, which allows for faster pickup times*
+
+![Bus occupancy](results/bus-occupancy.png)  
+*The occupancy of our buses on a test with 48 instances. Note that our optimal solution only uses 28 agents, which in turn have a much higher occupancy.*
+

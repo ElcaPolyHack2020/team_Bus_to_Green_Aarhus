@@ -138,7 +138,7 @@ class MoveTo(BusJob):
             self.moved = True
 
     def is_done(self):
-        logger.info([self.bus.get_edge(),self.edge,self.stop_pos, self.bus.is_stopped(), self.bus.get_pos(), traci.vehicle.getStops(self.bus.id)])
+        logger.info(["Move done", self.bus.get_edge(),self.edge,self.bus.get_pos(),self.bus.get_lane(), self.stop_pos, self.bus.is_stopped(), self.bus.get_pos(), traci.vehicle.getNextStops(self.bus.id)])
         return self.bus.get_edge() == self.edge and self.bus.is_stopped()
 
 class IDLE(BusJob):
@@ -180,7 +180,7 @@ class DropOff(BusJob):
     def is_done(self):
         logger.info(["Busstation", self.start_time is not None and self.current_time > self.start_time + self.DURATION, ])
         return self.start_time is not None and self.current_time > self.start_time + self.DURATION
-
+    
 class PickUp(BusJob):
     DURATION=50
     def __init__(self, edge, pos, *args, **kwargs):
@@ -189,18 +189,21 @@ class PickUp(BusJob):
         self.pos=pos
         self.start_time = None
         self.current_time = None
+        self.state=0
         logger.info(["Busstation"])
 
     def step(self, time):
         super().step(time)
         self.current_time = time
-        if self.start_time is None:
+        if self.state==0:
             self.start_time = time
             traci.vehicle.setRoute(self.bus.id, [self.bus.get_edge()])
             traci.vehicle.changeTarget(self.bus.id, self.edge)
-            traci.vehicle.rerouteEffort(self.bus.id)
             self.bus.wait(self.DURATION, type=tc.STOP_DEFAULT)
-            traci.vehicle.setStop(vehID=self.bus.id, edgeID=self.edge, pos=self.pos, laneIndex=1, duration=50, flags=tc.STOP_DEFAULT)
+        elif self.state==1:
+            self.bus.move_to(self.edge, self.pos)
+            #traci.vehicle.setStop(vehID=self.bus.id, edgeID=self.edge, pos=self.pos, laneIndex=1, duration=50, flags=tc.STOP_DEFAULT)
+        self.state += 1
 
     def finish(self):
         for i in range(len(traci.vehicle.getStops(self.bus.id))):
@@ -246,20 +249,22 @@ class Bus:
 
     def move_to(self, edge, stop_pos=None):
         if stop_pos is not None and self.get_edge() == edge and self.get_pos() > stop_pos:
-            if current_edge.startswith("-"):
-                opposite_edge = current_edge[1:]
+            if edge.startswith("-"):
+                opposite_edge = edge[1:]
             else:
-                opposite_edge = "-"+current_edge
-            self.jobs = [MoveTo(opposite_edge, self.bus), MoveTo(edge, self.bus, stop_pos)] + self.jobs
+                opposite_edge = "-"+edge
+            self.jobs = [MoveTo(opposite_edge, None, self), MoveTo(edge, stop_pos, self)] + self.jobs
+            return False
         else:
             traci.vehicle.changeTarget(self.id, edge)
             if stop_pos is not None:
                 logger.info("Setting Stop at " + str(stop_pos))
                 n_stops=len(traci.vehicle.getStops(self.id))
-                if n_stops > 0:
-                    traci.vehicle.replaceStop(self.id, 0, edge, stop_pos, 1)                
+                if False:#n_stops > 0:
+                    traci.vehicle.replaceStop(self.id, 0, edge, stop_pos, 1, tc.STOP_PARKING)                
                 else:
-                    traci.vehicle.setStop(self.id, edge, stop_pos, 1)
+                    traci.vehicle.setStop(self.id, edge, stop_pos, 1, tc.STOP_PARKING)
+            return True
 
     def wait(self, duration, pos=None, type=tc.STOP_DEFAULT):
         stops = traci.vehicle.getStops(self.id)
@@ -334,13 +339,15 @@ class FixedNBusesSimulation(_StageScorer):
 
     def step(self, time):
         for bus in self.deployed_buses:
-            if (len(bus.jobs) == 0 or len(bus.jobs) == 1 and isinstance(bus.jobs[0], IDLE)) and self.next_passenger_index < 1:
+            if self.next_passenger_index < len(self.pedestrians):
                 p = self.pedestrians[self.next_passenger_index]
                 self.next_passenger_index += 1
                 bus.jobs.append(MoveTo(p.edge_from, p.position_from, bus)) # Go to that passenger
                 bus.jobs.append(IDLE(p.depart, bus)) # Wait until the passenger arrives
                 bus.jobs.append(PickUp(p.edge_to, p.position_to, bus)) # Wait until the passenger arrives
+                bus.jobs.append(IDLE(p.depart+10, bus))
                 bus.jobs.append(MoveTo(p.edge_to, p.position_to, bus)) # Go to the destination
                 bus.jobs.append(DropOff(bus)) # Let passenger exit
+                #bus.jobs.append(IDLE(bus)) # Let passenger exit
             bus.step(time)
 

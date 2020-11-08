@@ -2,7 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objects as go
-import plotly.express as px
+#import plotly.express as px
 import pandas as pd
 from dash.dependencies import Input, Output
 import numpy as np
@@ -15,9 +15,9 @@ from collections import Counter
 app = dash.Dash(__name__)#, external_stylesheets=external_stylesheets)
 server = app.server
 
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/earthquakes-23k.csv')
+#df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/earthquakes-23k.csv')
 
-busdf=pd.DataFrame({'hour':[np.random.randint(0,high=24) for i in range(0,100)],'bus_id':[np.random.randint(0,high=20) for i in range(0,100)],'occupancy':np.random.rand(100),'total_km':np.random.rand(100)*100.})#pd.read_csv('data/buses.csv')
+busdf=pd.read_json('data/buses.json')#pd.DataFrame({'hour':[np.random.randint(0,high=24) for i in range(0,100)],'bus_id':[np.random.randint(0,high=20) for i in range(0,100)],'occupancy':np.random.rand(100),'total_km':np.random.rand(100)*100.})#pd.read_csv('data/buses.csv')
 
 pass_df=pd.DataFrame({'hour':[np.random.randint(0,high=24) for i in range(0,5000)],'passenger_id':[np.random.randint(0,high=500) for i in range(0,5000)],'status':[np.random.randint(0,high=3) for i in range(0,5000)]})#pd.read_csv('data/buses.csv')
 
@@ -26,18 +26,23 @@ app.layout = html.Div(children=[
     html.H1(children='Buses for a Better Aarhus',style={'margin-top': '50px','margin-bottom': '25px', 'display': 'inline-block','font-size': '3em'}),
         html.Div(className='row',children=[
                 html.Div(className='one column div-user-controls'),
-                html.Div(className='ten columns div-for-charts bg-grey',children=[html.Div(id='map'),dcc.Slider(id='Hour',min=0,max=24,step=1,marks={i:str(i) for i in range(0,25)},value=0),
+                html.Div(className='ten columns div-for-charts bg-grey',children=[html.Div(id='map'),dcc.Slider(id='hour',min=0,max=24,step=1,marks={i:str(i) for i in range(0,25)},value=0),
                 html.H3("Time of Day") ],style={'height': '100%', 'display': 'inline-block'})
                ]),
         html.Div(className='row',children=[
             html.Div(className='one column div-user-controls'),
             html.Div(className='ten columns div-for-charts bg-grey',children=[dcc.Graph(id='scatter')],style={'height': '100%', 'display': 'inline-block'})
             ]),
+#        html.Div(className='row',children=[
+#        html.Div(className='one column div-user-controls'),
+#        html.Div(className='ten columns div-for-charts bg-grey',children=[dcc.Graph(id='dfig')],style={'height': '100%', 'display': 'inline-block'})
+#        ]),
         html.Div(className='row',children=[
         html.Div(className='one column div-user-controls'),
         html.Div(className='ten columns div-for-charts bg-grey',children=[
         #dbc.Row([dbc.Col(dcc.Graph(id='buses'),width=4), dbc.Col(dcc.Graph(id='passengers'),width=4)])
         html.Div(dcc.Graph(id='buses')),
+        html.Div(dcc.Graph(id='dfig')),
         html.Div(dcc.Graph(id='passengers'))],style={'height':'100%','display': 'inline-block'})
         #]),
         ]),
@@ -56,8 +61,8 @@ app.layout = html.Div(children=[
 
 ############ Transmission ###############
 @app.callback(
-    [Output('map', 'children'),Output('scatter', 'figure'),Output('buses', 'figure'),Output('passengers', 'figure')],
-    Input('Hour', 'value'))
+    [Output('map', 'children'),Output('scatter', 'figure'),Output('buses', 'figure'),Output('dfig', 'figure'),Output('passengers', 'figure')],
+    Input('hour', 'value'))
     #Input('attenuator', 'value'),
     #Input('athick', 'value'),
     #Input('detector', 'value'),
@@ -120,20 +125,25 @@ def update_graph(hour):#,attenuator,athick,detector,dthick):
     #km travelled ...
 
     sfig=go.Figure()
-    sfig.add_trace(go.Scatter(x=list(range(0,25)),y=np.array(occ)*100., name='average occupancy (%)'))
+    sfig.add_trace(go.Scatter(x=list(range(0,25)),y=np.array(occ), name='average occupancy (%)'))
     sfig.add_trace(go.Scatter(x=list(range(0,25)),y=total_km, name='distance traveled (km)'))
     sfig.add_trace(go.Scatter(x=list(range(0,25)),y=pw, name='passengers waiting'))
     sfig.add_trace(go.Scatter(x=list(range(0,25)),y=pr, name='passengers riding'))
     sfig.add_trace(go.Scatter(x=list(range(0,25)),y=pde, name='passengers delivered'))
-    sfig.update_layout(title='Network Statistics',xaxis_range=[0,20],xaxis_title='Time of Day')
+    sfig.update_layout(title='Network Statistics',xaxis_range=[0,3],xaxis_title='Time of Day')
 
-
+    bydf=busdf.where(busdf.hour == hour).dropna()
+    
     bfig=go.Figure()
     bfig.add_trace(go.Bar(x=bydf.bus_id,y=bydf.occupancy))
-    bfig.update_layout(title='Bus Occupancy',xaxis_range=[0,20],yaxis_range=[0,1],xaxis_title='Bus Number',yaxis_title='Percent Capacity')
+    bfig.update_layout(title='Bus Occupancy',xaxis_range=[0,50],yaxis_range=[0,100],xaxis_title='Bus Number',yaxis_title='Percent Capacity')
+    
+    ofig=go.Figure()
+    ofig.add_trace(go.Bar(x=bydf.bus_id,y=bydf.total_km))
+    ofig.update_layout(title='Distance Traveled',xaxis_range=[0,50],yaxis_range=[0,50],xaxis_title='Bus Number',yaxis_title='Distance (km)')
     
     #pie chart - passengers waiting, riding, delivered
-    bydf=busdf.where(busdf.hour == hour).dropna()
+
     
     pfig=go.Figure()
 
@@ -142,7 +152,7 @@ def update_graph(hour):#,attenuator,athick,detector,dthick):
     
 
     #fig.update_traces(marker=dict(colors=ccolors))
-    return children,sfig, bfig, pfig
+    return children,sfig, bfig, ofig, pfig
 
 
 #######################################

@@ -19,19 +19,19 @@ server = app.server
 
 busdf=pd.read_json('data/buses.json')#pd.DataFrame({'hour':[np.random.randint(0,high=24) for i in range(0,100)],'bus_id':[np.random.randint(0,high=20) for i in range(0,100)],'occupancy':np.random.rand(100),'total_km':np.random.rand(100)*100.})#pd.read_csv('data/buses.csv')
 
-pass_df=pd.DataFrame({'hour':[np.random.randint(0,high=24) for i in range(0,5000)],'passenger_id':[np.random.randint(0,high=500) for i in range(0,5000)],'status':[np.random.randint(0,high=3) for i in range(0,5000)]})#pd.read_csv('data/buses.csv')
+pass_df=pd.read_json('data/passengers.json')#pd.DataFrame({'hour':[np.random.randint(0,high=24) for i in range(0,5000)],'passenger_id':[np.random.randint(0,high=500) for i in range(0,5000)],'status':[np.random.randint(0,high=3) for i in range(0,5000)]})#pd.read_csv('data/buses.csv')
 
 
 app.layout = html.Div(children=[
     html.H1(children='Buses for a Better Aarhus',style={'margin-top': '50px','margin-bottom': '25px', 'display': 'inline-block','font-size': '3em'}),
         html.Div(className='row',children=[
                 html.Div(className='one column div-user-controls'),
-                html.Div(className='ten columns div-for-charts bg-grey',children=[html.Div(id='map'),dcc.Slider(id='hour',min=0,max=24,step=1,marks={i:str(i) for i in range(0,25)},value=0),
-                html.H3("Time of Day") ],style={'height': '100%', 'display': 'inline-block'})
+                html.Div(className='ten columns div-for-charts bg-grey',children=[html.Div(id='map')],style={'height': '100%', 'display': 'inline-block'})
                ]),
         html.Div(className='row',children=[
             html.Div(className='one column div-user-controls'),
-            html.Div(className='ten columns div-for-charts bg-grey',children=[dcc.Graph(id='scatter')],style={'height': '100%', 'display': 'inline-block'})
+            html.Div(className='ten columns div-for-charts bg-grey',children=[dcc.Graph(id='scatter'),dcc.Slider(id='hour',min=0,max=24,step=1,marks={i:str(i) for i in range(0,25)},value=0),
+            html.H3("Time of Day") ],style={'height': '100%', 'display': 'inline-block'})
             ]),
 #        html.Div(className='row',children=[
 #        html.Div(className='one column div-user-controls'),
@@ -62,7 +62,7 @@ app.layout = html.Div(children=[
 ############ Transmission ###############
 @app.callback(
     [Output('map', 'children'),Output('scatter', 'figure'),Output('buses', 'figure'),Output('dfig', 'figure'),Output('passengers', 'figure')],
-    Input('hour', 'value'))
+    [Input('hour', 'value')])
     #Input('attenuator', 'value'),
     #Input('athick', 'value'),
     #Input('detector', 'value'),
@@ -93,17 +93,17 @@ def update_graph(hour):#,attenuator,athick,detector,dthick):
     for h in range(0,25):
         total_km.append(busdf.where(busdf.hour == h).dropna().total_km.sum())
         occ.append(busdf.where(busdf.hour == h).dropna().occupancy.mean())
-        pydf=pass_df.where(pass_df.hour == h).dropna()
-        pw.append(pydf.where(pydf.status == 0.0).dropna().status.count())
-        pr.append(pydf.where(pydf.status == 1.0).dropna().status.count())
-        pde.append(pydf.where(pydf.status == 2.0).dropna().status.count())
+        pw.append(pass_df.where(pass_df.hs == h).dropna().hs.count())
+        pr.append(pass_df.where(pass_df.hb == h).dropna().hb.count())
+        pde.append(pass_df.where(pass_df.hd == h).dropna().hd.count())
+        #paban.append(pass_df.query('hour_board == -1 & hour_spawn == -1 & hour_drop == -1').dropna().hour_board.count()) #never got on bus
+        #print(pw,pr,pde,paban)
 
-    pydf=pass_df.where(pass_df.hour == hour).dropna()
-    pwait=pydf.where(pydf.status == 0.0).dropna().status.count()
-    priding=pydf.where(pydf.status == 1.0).dropna().status.count()
-    pdelivered=pydf.where(pydf.status == 2.0).dropna().status.count()
-    #print(pwait,priding,pdelivered)
-    #print(total_km)
+    #hour=0
+    #pydf=pass_df.where(pass_df.hour == hour).dropna()
+    pwait=pw[hour]#pass_df.where(pass_df.hs == h).dropna().hs.count()
+    priding=pr[hour]#pass_df.where(pass_df.hb == h).dropna().hb.count()
+    pdelivered=pde[hour]#pass_df.where(pass_df.hd == h).dropna().hd.count()
 
     #mfig=go.Figure()
 
@@ -133,14 +133,19 @@ def update_graph(hour):#,attenuator,athick,detector,dthick):
     sfig.update_layout(title='Network Statistics',xaxis_range=[0,3],xaxis_title='Time of Day')
 
     bydf=busdf.where(busdf.hour == hour).dropna()
-    
+    #bus_ids=[]
+    bydf.sort_values('bus_id',inplace=True)
     bfig=go.Figure()
     bfig.add_trace(go.Bar(x=bydf.bus_id,y=bydf.occupancy))
     bfig.update_layout(title='Bus Occupancy',xaxis_range=[0,50],yaxis_range=[0,100],xaxis_title='Bus Number',yaxis_title='Percent Capacity')
     
     ofig=go.Figure()
-    ofig.add_trace(go.Bar(x=bydf.bus_id,y=bydf.total_km))
-    ofig.update_layout(title='Distance Traveled',xaxis_range=[0,50],yaxis_range=[0,50],xaxis_title='Bus Number',yaxis_title='Distance (km)')
+    #bydf=busdf.where(busdf.hour == 0).dropna()
+    #ofig.add_trace(go.Bar(x=bydf.bus_id,y=bydf.total_km,marker_color=colors[0], name='Hour 0'))
+    for i in range(0,hour+1):
+        bydf=busdf.where(busdf.hour == i).dropna()
+        ofig.add_trace(go.Bar(x=bydf.bus_id,y=bydf.total_km,marker_color=colors[i], name='Hour '+str(i)))
+    ofig.update_layout(title='Distance Traveled',xaxis_range=[0,50],yaxis_range=[0,50],xaxis_title='Bus Number',yaxis_title='Distance (km)',barmode='stack')
     
     #pie chart - passengers waiting, riding, delivered
 

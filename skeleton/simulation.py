@@ -108,6 +108,35 @@ class _StageScorer(_BaseSimulation):
         
         return (stage1, stage2, stage3)
 
+class ExampleSimulation(_StageScorer):
+    """ The example simulation provided by ELCA
+    """
+    def setup(self):
+        n_pedestrians = len(self.pedestrians)
+        for bus_index, person in enumerate(self.pedestrians):
+            ##logger.info("Generating bus route {}/{}".format(bus_index, n_pedestrians))
+            
+            bus_id = f'bus_{bus_index}'
+
+            try:
+                traci.vehicle.add(vehID=bus_id, typeID="BUS_S", routeID="", depart=person.depart + 240.0, departPos=0, departSpeed=0, personCapacity=4)
+                
+                traci.vehicle.setRoute(bus_id, [self.bus_depot_start_edge])
+                traci.vehicle.changeTarget(bus_id, person.edge_from)
+                traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_from, pos=person.position_from, laneIndex=1, duration=50, flags=tc.STOP_DEFAULT)
+                
+                traci.vehicle.setRoute(bus_id, [person.edge_from])
+                traci.vehicle.changeTarget(bus_id, person.edge_to)
+                traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_to, pos=person.position_to, laneIndex=1, duration=50, flags=tc.STOP_DEFAULT)
+
+            except traci.exceptions.TraCIException as err:
+                print("TraCIException: {0}".format(err))
+            except Exception as err:
+                print("Unexpected error:", sys.exc_info()[0])
+                raise err
+
+        traci.vehicle.subscribe('bus_0', (tc.VAR_ROAD_ID, tc.VAR_LANEPOSITION, tc.VAR_POSITION , tc.VAR_NEXT_STOPS ))
+
 class BusJob:
     def __init__(self, bus):
         ##logger.info("init of "+self.__class__.__name__)
@@ -153,7 +182,7 @@ class IDLE(BusJob):
     
     def step(self, time):
         super().step(time)
-        if self.until - 3 < time:
+        if self.until - 3 < time: # This - 3 is so that the buses have time to start the next task before the idle finishes. why -3 I don't know...
             self.state = self.STATE_FINISHED
         if self.state == self.STATE_NOT_STARTED:
             self.bus.wait(self.until - time, self.pos, tc.STOP_PARKING)
@@ -203,11 +232,12 @@ class PickUp(BusJob):
         return self.start_time is not None and self.current_time > self.start_time + self.DURATION
 
 class Bus:
-    def __init__(self, id, start_edge, end_edge, type="BUS_S"):
+    def __init__(self, id, start_edge, end_edge, bus_lane=1, type="BUS_S"):
         self.id = id
         self.start_edge=start_edge
         self.end_edge=end_edge
         self.jobs = []
+        self.bus_lane = bus_lane
         traci.vehicle.add(
             vehID=self.id,
             typeID=type,
@@ -234,13 +264,10 @@ class Bus:
         return traci.vehicle.isStopped(self.id)
 
     def move_to(self, edge, stop_pos=None):
-        ##logger.info(["HERE",self.get_edge(), edge, self.get_pos(), stop_pos])
         try:
-            ##logger.info([self.get_edge(), edge, self.get_pos(), stop_pos])
             traci.vehicle.changeTarget(self.id, edge)
             if stop_pos is not None:
-                ##logger.info("Setting Stop at " + str(stop_pos))
-                traci.vehicle.setStop(self.id, edge, stop_pos, 1, 0xdeadbeef, tc.STOP_PARKING)
+                traci.vehicle.setStop(self.id, edge, stop_pos, self.bus_lane, 0xdeadbeef, tc.STOP_DEFAULT)
         except:
             if edge.startswith("-"):
                 opposite_edge = edge[1:]
@@ -251,59 +278,25 @@ class Bus:
     def wait(self, duration, pos=None, type=tc.STOP_DEFAULT):
         stops = traci.vehicle.getStops(self.id)
         if len(stops) > 0 and (pos is None or stops[0].endPos==pos):
-            traci.vehicle.setStop(self.id, self.get_edge(), stops[0].endPos, 1, duration, type)
+            traci.vehicle.setStop(self.id, self.get_edge(), stops[0].endPos, self.bus_lane, duration, type)
         else:
             if pos is None:
                 pos = self.get_pos()
             for i in range(0,200,10):
                 try:
-                    ##logger.info([duration, pos, type])
-                    traci.vehicle.setStop(self.id, self.get_edge(), pos+i, self.get_lane_idx(), duration, type)
+                    traci.vehicle.setStop(self.id, self.get_edge(), pos+i, self.bus_lane, duration, type)
                     break
                 except:
                     pass
                 
     def step(self, time):
         while len(self.jobs) > 0 and self.jobs[0].is_done():
-            ##logger.info("Job {} is done".format(self.jobs[0].__class__.__name__))
             self.jobs = self.jobs[1:]
 
-        ##logger.info(["route",traci.vehicle.getRoute(self.id)])
         if len(self.jobs) == 0 or len(traci.vehicle.getNextStops(self.id)) == 0:
-            ##logger.info("Adding IDLE job")
             self.jobs = [IDLE(time+10, self)] + self.jobs
 
-        ##logger.info(self.jobs)
         self.jobs[0].step(time)
-
-class ExampleSimulation(_StageScorer):
-    """ The example simulation provided by ELCA
-    """
-    def setup(self):
-        n_pedestrians = len(self.pedestrians)
-        for bus_index, person in enumerate(self.pedestrians):
-            ##logger.info("Generating bus route {}/{}".format(bus_index, n_pedestrians))
-            
-            bus_id = f'bus_{bus_index}'
-
-            try:
-                traci.vehicle.add(vehID=bus_id, typeID="BUS_S", routeID="", depart=person.depart + 240.0, departPos=0, departSpeed=0, personCapacity=4)
-                
-                traci.vehicle.setRoute(bus_id, [self.bus_depot_start_edge])
-                traci.vehicle.changeTarget(bus_id, person.edge_from)
-                traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_from, pos=person.position_from, laneIndex=1, duration=50, flags=tc.STOP_DEFAULT)
-                
-                traci.vehicle.setRoute(bus_id, [person.edge_from])
-                traci.vehicle.changeTarget(bus_id, person.edge_to)
-                traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_to, pos=person.position_to, laneIndex=1, duration=50, flags=tc.STOP_DEFAULT)
-
-            except traci.exceptions.TraCIException as err:
-                print("TraCIException: {0}".format(err))
-            except Exception as err:
-                print("Unexpected error:", sys.exc_info()[0])
-                raise err
-
-        traci.vehicle.subscribe('bus_0', (tc.VAR_ROAD_ID, tc.VAR_LANEPOSITION, tc.VAR_POSITION , tc.VAR_NEXT_STOPS ))
 
 class FixedNBusesSimulation(_StageScorer):
     N_BUSES = 5

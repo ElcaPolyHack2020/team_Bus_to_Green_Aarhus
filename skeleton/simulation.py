@@ -100,6 +100,7 @@ class _StageScorer(_BaseSimulation):
                 buses_l += 1
             driven_distance_all += dist_vehicle[0]
 
+        logger.info([(id,traci.person.getStage(id).description) for id in traci.person.getIDList()])
         stage1 = buses_l*self.N_BUSES_WEIGHT + not_arrived*self.NOT_ARRIVED_WEIGHT
 
         stage2 =  stage1+ self.total_waiting_time*self.WAIT_TIME_WEIGHT + driven_distance_l * self.DRIVEN_DISTANCE_WEIGHT
@@ -110,14 +111,14 @@ class _StageScorer(_BaseSimulation):
 
 class BusJob:
     def __init__(self, bus):
-        logger.info("init of "+self.__class__.__name__)
+        #logger.info("init of "+self.__class__.__name__)
         self.bus = bus
 
     def is_done(self):
         raise NotImplementedError()
 
     def step(self, time):
-        logger.info("step of "+self.__class__.__name__)
+        #logger.info("step of "+self.__class__.__name__)
         pass
     
     def finish(self):
@@ -126,7 +127,7 @@ class BusJob:
 class MoveTo(BusJob):
     def __init__(self, edge, stop_pos=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        logger.info(["Moving to", edge, stop_pos])
+        #logger.info(["Moving to", edge, stop_pos])
         self.edge = edge
         self.stop_pos = stop_pos
         self.moved = False
@@ -138,7 +139,7 @@ class MoveTo(BusJob):
             self.moved = True
 
     def is_done(self):
-        logger.info(["Move done", self.bus.get_edge(),self.edge,self.bus.get_pos(),self.bus.get_lane(), self.stop_pos, self.bus.is_stopped(), self.bus.get_pos(), traci.vehicle.getNextStops(self.bus.id)])
+        #logger.info(["Move done", self.bus.get_edge(),self.edge,self.bus.get_pos(),self.bus.get_lane(), self.stop_pos, self.bus.is_stopped(), self.bus.get_pos(), traci.vehicle.getNextStops(self.bus.id)])
         return self.bus.get_edge() == self.edge and self.bus.is_stopped()
 
 class IDLE(BusJob):
@@ -147,7 +148,7 @@ class IDLE(BusJob):
     STATE_FINISHED = 2
     def __init__(self, until, *args,pos=None,**kwargs):
         super().__init__(*args, **kwargs)
-        logger.info(["Sleeping until", until])
+        #logger.info(["Sleeping until", until])
         self.until = until
         self.pos = pos
         self.state=self.STATE_NOT_STARTED
@@ -168,7 +169,7 @@ class DropOff(BusJob):
         super().__init__(*args, **kwargs)
         self.start_time = None
         self.current_time = None
-        logger.info(["Busstation"])
+        #logger.info(["Busstation"])
 
     def step(self, time):
         super().step(time)
@@ -178,7 +179,7 @@ class DropOff(BusJob):
             self.bus.wait(self.DURATION, type=tc.STOP_DEFAULT)
         
     def is_done(self):
-        logger.info(["Busstation", self.start_time is not None and self.current_time > self.start_time + self.DURATION, ])
+        #logger.info(["Busstation", self.start_time is not None and self.current_time > self.start_time + self.DURATION, ])
         return self.start_time is not None and self.current_time > self.start_time + self.DURATION
     
 class PickUp(BusJob):
@@ -190,7 +191,7 @@ class PickUp(BusJob):
         self.start_time = None
         self.current_time = None
         self.state=0
-        logger.info(["Busstation"])
+        #logger.info(["Busstation"])
 
     def step(self, time):
         super().step(time)
@@ -206,12 +207,10 @@ class PickUp(BusJob):
         self.state += 1
 
     def finish(self):
-        for i in range(len(traci.vehicle.getStops(self.bus.id))):
-            traci.vehicle.replaceStop(vehID=self.bus.id, nextStopIndex=i, edgeID=self.edge, pos=self.pos, laneIndex=1, duration=0, flags=tc.STOP_DEFAULT)
-            
+        pass
 
     def is_done(self):
-        logger.info(["Busstation", self.start_time is not None and self.current_time > self.start_time + self.DURATION, ])
+        #logger.info(["Busstation", self.start_time is not None and self.current_time > self.start_time + self.DURATION, ])
         return self.start_time is not None and self.current_time > self.start_time + self.DURATION
 
 
@@ -248,49 +247,46 @@ class Bus:
         return traci.vehicle.isStopped(self.id)
 
     def move_to(self, edge, stop_pos=None):
-        if stop_pos is not None and self.get_edge() == edge and self.get_pos() > stop_pos:
+        #logger.info(["HERE",self.get_edge(), edge, self.get_pos(), stop_pos])
+        try:
+            #logger.info([self.get_edge(), edge, self.get_pos(), stop_pos])
+            traci.vehicle.changeTarget(self.id, edge)
+            if stop_pos is not None:
+                #logger.info("Setting Stop at " + str(stop_pos))
+                n_stops=len(traci.vehicle.getStops(self.id))
+                traci.vehicle.setStop(self.id, edge, stop_pos, 1, 0xdeadbeef, tc.STOP_PARKING)
+        except:
             if edge.startswith("-"):
                 opposite_edge = edge[1:]
             else:
                 opposite_edge = "-"+edge
             self.jobs = [MoveTo(opposite_edge, None, self), MoveTo(edge, stop_pos, self)] + self.jobs
-            return False
-        else:
-            traci.vehicle.changeTarget(self.id, edge)
-            if stop_pos is not None:
-                logger.info("Setting Stop at " + str(stop_pos))
-                n_stops=len(traci.vehicle.getStops(self.id))
-                if False:#n_stops > 0:
-                    traci.vehicle.replaceStop(self.id, 0, edge, stop_pos, 1, tc.STOP_PARKING)                
-                else:
-                    traci.vehicle.setStop(self.id, edge, stop_pos, 1, tc.STOP_PARKING)
-            return True
 
     def wait(self, duration, pos=None, type=tc.STOP_DEFAULT):
         stops = traci.vehicle.getStops(self.id)
         if len(stops) > 0 and (pos is None or stops[0].endPos==pos):
-            traci.vehicle.replaceStop(self.id, 0, self.get_edge(), stops[0].endPos, 1, duration, type)
+            traci.vehicle.setStop(self.id, self.get_edge(), stops[0].endPos, 1, duration, type)
         else:
             if pos is None:
                 pos = self.get_pos()
             for i in range(0,200,10):
                 try:
-                    logger.info([duration, pos, type])
+                    #logger.info([duration, pos, type])
                     traci.vehicle.setStop(self.id, self.get_edge(), pos+i, self.get_lane_idx(), duration, type)
                     break
                 except:
                     pass
     def step(self, time):
         while len(self.jobs) > 0 and self.jobs[0].is_done():
-            logger.info("Job {} is done".format(self.jobs[0].__class__.__name__))
+            #logger.info("Job {} is done".format(self.jobs[0].__class__.__name__))
             self.jobs = self.jobs[1:]
 
-        logger.info(["route",traci.vehicle.getRoute(self.id)])
-        if len(self.jobs) == 0:
-            logger.info("Adding IDLE job")
-            self.jobs.append(IDLE(time+10, self))
+        #logger.info(["route",traci.vehicle.getRoute(self.id)])
+        if len(self.jobs) == 0 or len(traci.vehicle.getNextStops(self.id)) == 0:
+            #logger.info("Adding IDLE job")
+            self.jobs = [IDLE(time+10, self)] + self.jobs
 
-        logger.info(self.jobs)
+        #logger.info(self.jobs)
         self.jobs[0].step(time)
 
 class ExampleSimulation(_StageScorer):
@@ -299,7 +295,7 @@ class ExampleSimulation(_StageScorer):
     def setup(self):
         n_pedestrians = len(self.pedestrians)
         for bus_index, person in enumerate(self.pedestrians):
-            logger.info("Generating bus route {}/{}".format(bus_index, n_pedestrians))
+            #logger.info("Generating bus route {}/{}".format(bus_index, n_pedestrians))
             
             bus_id = f'bus_{bus_index}'
 
@@ -339,7 +335,7 @@ class FixedNBusesSimulation(_StageScorer):
 
     def step(self, time):
         for bus in self.deployed_buses:
-            if self.next_passenger_index < len(self.pedestrians):
+            if self.next_passenger_index < len(self.pedestrians) and len(bus.jobs) < 3:
                 p = self.pedestrians[self.next_passenger_index]
                 self.next_passenger_index += 1
                 bus.jobs.append(MoveTo(p.edge_from, p.position_from, bus)) # Go to that passenger
@@ -349,5 +345,8 @@ class FixedNBusesSimulation(_StageScorer):
                 bus.jobs.append(MoveTo(p.edge_to, p.position_to, bus)) # Go to the destination
                 bus.jobs.append(DropOff(bus)) # Let passenger exit
                 #bus.jobs.append(IDLE(bus)) # Let passenger exit
+                print("Moving",p.id)
+                logger.info([(id,traci.person.getStage(id).description) for id in traci.person.getIDList()])
+                input()
             bus.step(time)
 

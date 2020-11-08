@@ -45,7 +45,7 @@ def test(
     simulation.run()
 
     score = simulation.get_score()    
-    return traci #traci.close()
+    #return traci #traci.close()
     return score
 
 def add_pedestrians(seed: int, net_xml_file: str, max_steps: int, n_pedestrians:int):

@@ -153,6 +153,8 @@ class BusJob:
         pass
 
 class MoveTo(BusJob):
+    """Moves to a given edge and stops at the given position
+    """
     def __init__(self, edge, stop_pos=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         ##logger.info(["Moving to", edge, stop_pos])
@@ -170,6 +172,8 @@ class MoveTo(BusJob):
         return self.bus.get_edge() == self.edge and self.bus.is_stopped()
 
 class IDLE(BusJob):
+    """Parks the bus next to the road for a given amount of time
+    """
     STATE_NOT_STARTED = 0
     STATE_IDLE = 1
     STATE_FINISHED = 2
@@ -191,6 +195,8 @@ class IDLE(BusJob):
         return self.state == self.STATE_FINISHED
 
 class DropOff(BusJob):
+    """Stops the bus to let passengers out
+    """
     DURATION=0
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -208,6 +214,11 @@ class DropOff(BusJob):
         return self.start_time is not None and self.current_time > self.start_time + self.DURATION
     
 class PickUp(BusJob):
+    """Picks up a passenger and brings him to the given node and position.
+    Important: The bus has to already be located at the pickup point
+    Important: It will also kind of drive to the dropoff location but not all the way, I don't know don't ask me, ask the sumo devs.
+    Important: No, I am not proud of my code here, i don't think its that clear why it actually works, even I don't fully understand it but sumos ways are what they are
+    """
     DURATION=3
     def __init__(self, edge, pos, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -232,12 +243,15 @@ class PickUp(BusJob):
         return self.start_time is not None and self.current_time > self.start_time + self.DURATION
 
 class Bus:
+    """A wrapper for a bus that can hold and queue tasks (=jobs)
+    """
     def __init__(self, id, start_edge, end_edge, bus_lane=1, type="BUS_S"):
         self.id = id
         self.start_edge=start_edge
         self.end_edge=end_edge
         self.jobs = []
         self.bus_lane = bus_lane
+        self.done=False
         traci.vehicle.add(
             vehID=self.id,
             typeID=type,
@@ -264,11 +278,15 @@ class Bus:
         return traci.vehicle.isStopped(self.id)
 
     def move_to(self, edge, stop_pos=None):
-        try:
+        """Moves to a given edge and stop position. It will try to go in a circle if the target edge is downstream. I hate that I
+        have to implement the logic for that but it is what it is, at least it works.
+        """
+        try: # Try to do it normally
             traci.vehicle.changeTarget(self.id, edge)
             if stop_pos is not None:
                 traci.vehicle.setStop(self.id, edge, stop_pos, self.bus_lane, 0xdeadbeef, tc.STOP_DEFAULT)
-        except:
+        except: # If there was an error, we probably tried to move backwards, so we'll first go to the opposite side of the street and then back to where we are
+            # Ideally there would be a nicer way of doing this, as this is also dependent on the opposite node being noted with "-", e.g. "1" and "-1". Also it might crash if there is no opposite node.
             if edge.startswith("-"):
                 opposite_edge = edge[1:]
             else:
@@ -276,6 +294,8 @@ class Bus:
             self.jobs = [MoveTo(opposite_edge, None, self), MoveTo(edge, stop_pos, self)] + self.jobs
 
     def wait(self, duration, pos=None, type=tc.STOP_DEFAULT):
+        """Waits for a given amount of time at the given position on the current edge. The type is to determine wether we wait on the street or if we park the bus next to the street.
+        """
         stops = traci.vehicle.getStops(self.id)
         if len(stops) > 0 and (pos is None or stops[0].endPos==pos):
             traci.vehicle.setStop(self.id, self.get_edge(), stops[0].endPos, self.bus_lane, duration, type)
@@ -290,15 +310,22 @@ class Bus:
                     pass
                 
     def step(self, time):
+        """Advances the internal simulation by one step
+        """
         while len(self.jobs) > 0 and self.jobs[0].is_done():
             self.jobs = self.jobs[1:]
 
-        if len(self.jobs) == 0 or len(traci.vehicle.getNextStops(self.id)) == 0:
+        if not self.done and (len(self.jobs) == 0 or len(traci.vehicle.getNextStops(self.id)) == 0):
             self.jobs = [IDLE(time+10, self)] + self.jobs
-
-        self.jobs[0].step(time)
-
+            
+        if len(self.jobs) > 0:
+            self.jobs[0].step(time)
+        else:
+            traci.vehicle.remove(self.id)
+            
 class FixedNBusesSimulation(_StageScorer):
+    """Deploys N Buses 
+    """
     N_BUSES = 5
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -317,14 +344,17 @@ class FixedNBusesSimulation(_StageScorer):
         vehicles = set(traci.vehicle.getIDList())
         for bus in self.deployed_buses:
             if bus.id in vehicles:
-                if self.next_passenger_index < len(self.pedestrians) and len(bus.jobs) < 3:
-                    p = self.pedestrians[self.next_passenger_index]
-                    self.next_passenger_index += 1
-                    bus.jobs.append(MoveTo(p.edge_from, p.position_from, bus)) # Go to that passenger
-                    bus.jobs.append(IDLE(p.depart, bus)) # Wait until the passenger arrives
-                    bus.jobs.append(PickUp(p.edge_to, p.position_to, bus)) # Wait until the passenger arrives
-                    bus.jobs.append(MoveTo(p.edge_to, p.position_to, bus)) # Go to the destination
-                    bus.jobs.append(DropOff(bus)) # Let passenger exit
-                    
+                if len(bus.jobs) < 3:
+                    if self.next_passenger_index < len(self.pedestrians):
+                        p = self.pedestrians[self.next_passenger_index]
+                        self.next_passenger_index += 1
+                        bus.jobs.append(MoveTo(p.edge_from, p.position_from, bus)) # Go to that passenger
+                        bus.jobs.append(IDLE(p.depart, bus)) # Wait until the passenger arrives
+                        bus.jobs.append(PickUp(p.edge_to, p.position_to, bus)) # Wait until the passenger arrives
+                        bus.jobs.append(MoveTo(p.edge_to, p.position_to, bus)) # Go to the destination
+                        bus.jobs.append(DropOff(bus)) # Let passenger exit
+                    else:
+                        bus.jobs.append(MoveTo(bus.end_edge, 100, bus)) # Go home
+                        bus.done = True                
                 bus.step(time)
 

@@ -1,9 +1,9 @@
 # ELCA-Challenge: Bus To Green Aarhus
 This is the repository for the PolyHack Hackathon 2020 of the team "bus to green aarhus"
 
-# WatchMe
-First and foremost, you should enjoy our "WatchMe" of this repository. A short and fun summary of our adventures with Aarhus that outlines the essence of this project in a concise and witty manner:
-[WatchMe.mp4](WatchMe.mp4)
+# [WatchMe](https://youtu.be/NpEaa2P7qZI)
+First and foremost, you should enjoy our "WatchMe" of this repository. A short and fun summary of our adventures with Aarhus that outlines the essence of this project in a concise and witty manner:  
+[<img src="https://img.youtube.com/vi/NpEaa2P7qZI/maxresdefault.jpg" width="50%">](https://youtu.be/NpEaa2P7qZI)
 
 # WebApp
 We decided the best way to show the magnitude of the problem is through an interactive Web App, where we show our results. This can be found at https://aarhus-mobility.herokuapp.com/

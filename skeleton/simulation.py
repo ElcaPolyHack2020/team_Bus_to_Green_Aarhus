@@ -71,22 +71,24 @@ class _StageScorer(_BaseSimulation):
     def update_stats(self):
         person_ids = traci.person.getIDList()
         self.total_waiting_time += sum([1 for id in person_ids if traci.person.getStage(id).type == 1])
-        self.buses |= {id for id in traci.vehicle.getIDList() if id.startswith("bus")}
+        current_bus_list = [id for id in traci.vehicle.getIDList() if id.startswith("bus")]
+        self.buses |= set(current_bus_list)
 
-        for id in [id for id in traci.vehicle.getIDList() if id.startswith("bus")]:
-            new_dist = 0
-            vehicle_id = None
+        for id in current_bus_list:
+            if not id in self.distance_dict:
+                self.distance_dict[id] = (0, None)
+
+            new_dist = self.distance_dict[id][0]
+            vehicle_id = self.distance_dict[id][1]
             try: 
                 new_dist = traci.vehicle.getDistance(id)
-                vehicle_id = traci.vehicle.getTypeID(id)
+                if vehicle_id==None:
+                    vehicle_id = traci.vehicle.getTypeID(id)
             except:
-                pass
+                raise Error("Update Scoring functino not working")
 
-            if id in self.distance_dict:
-                self.distance_dict[id] = (max(self.distance_dict[id][0], new_dist), vehicle_id if self.distance_dict[id][1]==None else self.distance_dict[id][1])
-            else:     
-                self.distance_dict[id] = (new_dist, vehicle_id)
-
+            self.distance_dict[id] = (max(self.distance_dict[id][0], new_dist), vehicle_id)
+    
 
     def get_score(self):
         not_arrived = sum([1 for id in traci.person.getIDList() if "Arrived" not in traci.person.getStage(id).description])
@@ -245,7 +247,7 @@ class PickUp(BusJob):
 class Bus:
     """A wrapper for a bus that can hold and queue tasks (=jobs)
     """
-    def __init__(self, id, start_edge, end_edge, bus_lane=1, type="BUS_S"):
+    def __init__(self, id, start_edge, end_edge, bus_lane=1, type="BUS_L"):
         self.id = id
         self.start_edge=start_edge
         self.end_edge=end_edge
@@ -259,7 +261,7 @@ class Bus:
             depart=0,
             departPos=0,
             departSpeed=0,
-            personCapacity=4
+            personCapacity=8
         )
     
     def get_pos(self):

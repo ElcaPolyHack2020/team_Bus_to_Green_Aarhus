@@ -247,7 +247,7 @@ class PickUp(BusJob):
 class Bus:
     """A wrapper for a bus that can hold and queue tasks (=jobs)
     """
-    def __init__(self, id, start_edge, end_edge, bus_lane=1, type="BUS_L"):
+    def __init__(self, id, start_edge, end_edge, bus_lane=0, type="BUS_L"):
         self.id = id
         self.start_edge=start_edge
         self.end_edge=end_edge
@@ -328,7 +328,7 @@ class Bus:
 class FixedNBusesSimulation(_StageScorer):
     """Deploys N Buses 
     """
-    N_BUSES = 5
+    N_BUSES = 24
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.deployed_buses = set()

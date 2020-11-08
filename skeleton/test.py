@@ -28,7 +28,8 @@ def test(
     n_pedestrians=10,
     sumo_cfg=os.path.join("test_data","rand.sumocfg"),
     network=os.path.join("test_data","rand.net.xml"),
-    bus_depot = '-269',
+    bus_depot_start = '-269',
+    bus_depot_end = '-269',
     gui=False):
 
     if gui:
@@ -41,7 +42,7 @@ def test(
 
     pedestrians = add_pedestrians(seed=seed, net_xml_file=network, max_steps=simulation_steps, n_pedestrians=n_pedestrians)
 
-    simulation = sim_cls(simulation_steps, 0, pedestrians, bus_depot, bus_depot)
+    simulation = sim_cls(simulation_steps, 0, pedestrians, bus_depot_start, bus_depot_end)
     simulation.run()
 
     score = simulation.get_score()    
@@ -126,12 +127,14 @@ class PedestrianWeight:
         self.weight = weight
 
 if __name__ == '__main__':
-
+    
     score = test(
         FixedNBusesSimulation,
         gui=True,
         n_pedestrians=20
     )
+    
+    # score = test(FixedNBusesSimulation, gui=True, sumo_cfg=os.path.join("..","..","trafficmap","aarhus","osm.sumocfg"), network=os.path.join("..","..","trafficmap","aarhus","osm.net.xml"), bus_depot_start="744377000#0", bus_depot_end="521059831#0")
     print("Score Level 1:", score[0])
     print("Score Level 2:", score[1])
     print("Score Level 3:", score[2])

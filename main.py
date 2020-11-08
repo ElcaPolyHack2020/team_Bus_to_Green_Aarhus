@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os
 import sys
 import xml.etree.ElementTree as ET
@@ -17,7 +18,7 @@ else:
 # Load traci
 import traci
 import traci.constants as tc
-from simulation import Simulation
+from simulation import *
 
 
 def main():
@@ -36,9 +37,9 @@ def main():
     pedestrians_until_step = simulation_steps # create pedestrians up until this step
 
     # location of the sumocfg file
-    sumocfg_file = os.path.join("..","..","trafficmap","aarhus","osm.sumocfg")
+    sumocfg_file = os.path.join("data","aarhus","osm.sumocfg")
     # location of the XML file containing the city network
-    network_xml_file = os.path.join("..","..","trafficmap","aarhus","osm.net.xml")
+    network_xml_file = os.path.join("data","aarhus","osm.net.xml")
 
     # logfiles
     logs_folder = './logs/'
@@ -59,7 +60,7 @@ def main():
     bus_depot_start_edge = '744377000#0'
     bus_depot_end_edge = '521059831#0'
 
-    simulation = Simulation(simulation_steps, sleep_time, pedestrians, bus_depot_start_edge, bus_depot_end_edge)
+    simulation = OptimizedFixedNBusesSimulation(simulation_steps, sleep_time, pedestrians, bus_depot_start_edge, bus_depot_end_edge)
     simulation.run()
 
     ######################################################################
@@ -151,7 +152,7 @@ def generate_random_people(seed: int, scale_factor: float, net_xml_file: str, ma
 
 def parse_pedestrian_weights():
     pedestrian_weights = []
-    with open('pedestrians_weights.csv', encoding='utf8') as csv_file:
+    with open(os.path.join('data','pedestrians_weights.csv'), encoding='utf8') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=';')
         first_line = True
         for row in csv_reader:

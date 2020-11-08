@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="rand.net.xml"/>
+        <route-files value="rand.rou.xml,bus_types.add.xml"/>
+    </input>
+
+    <time>
+        <begin value="0"/>
+    </time>
+
+    <gui_only>
+        <gui-settings-file value="viewsettings.xml"/>
+    </gui_only>
+
+    <report>
+        <verbose value="false"/>
+        <no-step-log value="true"/>
+    </report>
+
+    <additional>
+        <vTypeProbe id="probe1" type="BUS_S" freq="10" file="../logs/bus_s.xml"/>
+        <vTypeProbe id="probe2" type="BUS_M" freq="10" file="../logs/bus_m.xml"/>
+        <vTypeProbe id="probe3" type="BUS_L" freq="10" file="../logs/bus_l.xml"/>
+    </additional>
+
+
+</configuration>

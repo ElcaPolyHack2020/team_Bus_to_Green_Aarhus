@@ -1,0 +1,7 @@
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+
+    <vType id="BUS_S" accel="2.6" decel="4.5" sigma="0" length="10" minGap="3" maxSpeed="70" color="1,0,0" guiShape="bus" personCapacity="2" />
+    <vType id="BUS_M" accel="2.6" decel="4.5" sigma="0" length="14" minGap="3" maxSpeed="70" color="1,0,0" guiShape="bus" personCapacity="4" />
+    <vType id="BUS_L" accel="2.6" decel="4.5" sigma="0" length="18" minGap="3" maxSpeed="70" color="1,0,0" guiShape="bus" personCapacity="8" />
+
+</routes>

@@ -1,0 +1,142 @@
+***Starting server on port 53205 ***
+Loading net-file from 'data/aarhus/osm.net.xml' ... done (1019ms).
+Warning: Unused states in tlLogic '1036716424', program '0' in phase 0 after tl-index 13
+Warning: At actuated tlLogic '106034511', linkIndex 2 has no controlling detector
+Warning: At actuated tlLogic '106034511', linkIndex 3 has no controlling detector
+Warning: Unused states in tlLogic '106351710', program '0' in phase 0 after tl-index 13
+Warning: Unused states in tlLogic '106351727', program '0' in phase 0 after tl-index 10
+Warning: Unused states in tlLogic '60144164', program '0' in phase 0 after tl-index 10
+Warning: Unused states in tlLogic '71459094', program '0' in phase 0 after tl-index 15
+Warning: At actuated tlLogic '71459094', linkIndex 6 has no controlling detector
+Warning: At actuated tlLogic '71459094', linkIndex 7 has no controlling detector
+Warning: Unused states in tlLogic '97987110', program '0' in phase 0 after tl-index 4
+Warning: Unused states in tlLogic 'GS_cluster_106078399_106078406_60479064_60479078', program '0' in phase 0 after tl-index 19
+Warning: Unused states in tlLogic 'GS_cluster_1139543862_5840807894_5840807895_5840807896', program '0' in phase 0 after tl-index 13
+Warning: Unused states in tlLogic 'GS_cluster_255901977_255902537_5359952800_5359952801', program '0' in phase 0 after tl-index 7
+Warning: Unused states in tlLogic 'GS_cluster_4900504856_75502036_876198126_876198131', program '0' in phase 0 after tl-index 8
+Warning: Unused states in tlLogic 'cluster_106034532_3921684121_4900508587_4900508589_7797208550', program '0' in phase 0 after tl-index 8
+Warning: At actuated tlLogic 'cluster_106078418_420230697_71153895', linkIndex 2 has no controlling detector
+Warning: At actuated tlLogic 'cluster_106078418_420230697_71153895', linkIndex 3 has no controlling detector
+Warning: Unused states in tlLogic 'cluster_106078434_705254806', program '0' in phase 0 after tl-index 14
+Warning: Unused states in tlLogic 'cluster_1556124600_1556124607', program '0' in phase 0 after tl-index 12
+Warning: Unused states in tlLogic 'cluster_1559349710_1559349720', program '0' in phase 0 after tl-index 16
+Warning: At actuated tlLogic 'cluster_1561585988_1561586003', linkIndex 4 has no controlling detector
+Warning: At actuated tlLogic 'cluster_1561585988_1561586003', linkIndex 5 has no controlling detector
+Warning: At actuated tlLogic 'cluster_4797009492_4797009493_5223514158_6966848561', linkIndex 11 has no controlling detector
+Warning: At actuated tlLogic 'cluster_4797009492_4797009493_5223514158_6966848561', linkIndex 12 has no controlling detector
+Warning: At actuated tlLogic 'cluster_4797009492_4797009493_5223514158_6966848561', linkIndex 13 has no controlling detector
+Warning: At actuated tlLogic 'gneJ14', linkIndex 7 has no controlling detector
+Warning: At actuated tlLogic 'gneJ14', linkIndex 8 has no controlling detector
+Warning: At actuated tlLogic 'gneJ15', linkIndex 9 has no controlling detector
+Warning: At actuated tlLogic 'gneJ15', linkIndex 10 has no controlling detector
+Warning: Unused states in tlLogic 'joinedS_5', program '0' in phase 0 after tl-index 14
+Loading done.
+Simulation started with time: 0.00
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_1' on lane '-33282745#2_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_0' on lane '-32661655#1_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_2' on lane '429793777#1_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_3' on lane '8080257#4_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_4' on lane '52821213#0_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_5' on lane '-142484052#1_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_6' on lane '50635410#7_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_7' on lane '39219528#6_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_9' on lane '77491278#1_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_10' on lane '142298859#1_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_8' on lane '-142484081#7_0' is too close to brake.
+Error: tcpip::Socket::recvAndCheck @ recv: peer shutdown
+Quitting (on error).
+Simulation ended at time: 2039.00
+Performance: 
+ Duration: 73.64s
+ Real time factor: 27.6895
+ UPS: 1331.758060
+ UPS-Persons: 82.688286
+Vehicles: 
+ Inserted: 162 (Loaded: 182)
+ Running: 60
+ Waiting: 0
+Persons: 
+ Inserted: 5746
+ Running: 3
+Statistics (avg):
+ RouteLength: 3325.16
+ Speed: 10.01
+ Duration: 341.33
+ WaitingTime: 63.64
+ TimeLoss: 110.86
+ DepartDelay: 0.52
+Ride Statistics (avg of 9 rides):
+ WaitingTime: 99.89
+ RouteLength: 2521.41
+ Duration: 247.44
+
+DijkstraRouter answered 6 queries and explored 3795.00 edges on average.
+DijkstraRouter spent 0.06s answering queries (9.50ms on average).
+DijkstraRouter answered 2 queries and explored 828.00 edges on average.
+DijkstraRouter spent 0.00s answering queries (2.00ms on average).
+DijkstraRouter answered 8 queries and explored 904.50 edges on average.
+DijkstraRouter spent 0.02s answering queries (2.62ms on average).
+DijkstraRouter answered 2 queries and explored 3372.00 edges on average.
+DijkstraRouter spent 0.02s answering queries (9.50ms on average).
+DijkstraRouter answered 6 queries and explored 846.00 edges on average.
+DijkstraRouter spent 0.01s answering queries (2.17ms on average).
+DijkstraRouter answered 2 queries and explored 3613.00 edges on average.
+DijkstraRouter spent 0.02s answering queries (10.50ms on average).
+DijkstraRouter answered 2 queries and explored 1731.00 edges on average.
+DijkstraRouter spent 0.01s answering queries (4.50ms on average).
+DijkstraRouter answered 8 queries and explored 2641.50 edges on average.
+DijkstraRouter spent 0.05s answering queries (6.38ms on average).
+DijkstraRouter answered 6 queries and explored 2859.00 edges on average.
+DijkstraRouter spent 0.04s answering queries (6.83ms on average).
+DijkstraRouter answered 6 queries and explored 248.00 edges on average.
+DijkstraRouter spent 0.01s answering queries (0.83ms on average).
+DijkstraRouter answered 2 queries and explored 1134.00 edges on average.
+DijkstraRouter spent 0.01s answering queries (2.50ms on average).
+DijkstraRouter answered 6 queries and explored 2643.00 edges on average.
+DijkstraRouter spent 0.04s answering queries (6.50ms on average).
+DijkstraRouter answered 2 queries and explored 2739.00 edges on average.
+DijkstraRouter spent 0.01s answering queries (6.00ms on average).
+DijkstraRouter answered 6 queries and explored 3131.00 edges on average.
+DijkstraRouter spent 0.05s answering queries (7.83ms on average).
+DijkstraRouter answered 8 queries and explored 788.25 edges on average.
+DijkstraRouter spent 0.02s answering queries (2.62ms on average).
+DijkstraRouter answered 2 queries and explored 1980.00 edges on average.
+DijkstraRouter spent 0.01s answering queries (4.50ms on average).
+DijkstraRouter answered 6 queries and explored 350.00 edges on average.
+DijkstraRouter spent 0.00s answering queries (0.50ms on average).
+DijkstraRouter answered 58 queries and explored 2125.90 edges on average.
+DijkstraRouter spent 0.32s answering queries (5.57ms on average).
+DijkstraRouter answered 6 queries and explored 4265.00 edges on average.
+DijkstraRouter spent 0.07s answering queries (10.83ms on average).
+DijkstraRouter answered 6 queries and explored 4512.00 edges on average.
+DijkstraRouter spent 0.07s answering queries (11.83ms on average).
+DijkstraRouter answered 134 queries and explored 2498.51 edges on average.
+DijkstraRouter spent 0.75s answering queries (5.63ms on average).

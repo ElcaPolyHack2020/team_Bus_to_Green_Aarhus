@@ -1,5 +1,5 @@
-***Starting server on port 40059 ***
-Loading net-file from 'data/aarhus/osm.net.xml' ... done (1098ms).
+***Starting server on port 45065 ***
+Loading net-file from 'data/aarhus/osm.net.xml' ... done (1170ms).
 Warning: Unused states in tlLogic '1036716424', program '0' in phase 0 after tl-index 13
 Warning: At actuated tlLogic '106034511', linkIndex 2 has no controlling detector
 Warning: At actuated tlLogic '106034511', linkIndex 3 has no controlling detector
@@ -32,22 +32,82 @@ Warning: At actuated tlLogic 'gneJ15', linkIndex 10 has no controlling detector
 Warning: Unused states in tlLogic 'joinedS_5', program '0' in phase 0 after tl-index 14
 Loading done.
 Simulation started with time: 0.00
-Error: tcpip::Socket::recvAndCheck @ recv: peer shutdown
-Quitting (on error).
-Simulation ended at time: 0.00
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: Position on lane must not be negative.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_1' on lane '-33282745#2_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_0' on lane '-32661655#1_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_2' on lane '429793777#1_0' is too close to brake.
+Error: Answered with error to command 0xc4: stop for vehicle 'bus_3' on lane '8080257#4_0' is too close to brake.
+Simulation ended at time: 1034.00
 Performance: 
- Duration: 33.78s
- Real time factor: 0
- UPS: 0.000000
+ Duration: 133.15s
+ Real time factor: 7.76574
+ UPS: 345.560237
+ UPS-Persons: 19.001269
 Vehicles: 
- Inserted: 0 (Loaded: 1)
- Running: 0
+ Inserted: 97 (Loaded: 99)
+ Running: 51
  Waiting: 0
+Persons: 
+ Inserted: 209
+ Running: 3
 Statistics (avg):
- RouteLength: 0.00
- Speed: 0.00
- Duration: 0.00
- WaitingTime: 0.00
- TimeLoss: 0.00
- DepartDelay: 0.00
+ RouteLength: 2946.56
+ Speed: 10.13
+ Duration: 298.52
+ WaitingTime: 48.67
+ TimeLoss: 90.10
+ DepartDelay: 0.60
+Ride Statistics (avg of 3 rides):
+ WaitingTime: 295.33
+ RouteLength: 1898.57
+ Duration: 165.67
 
+DijkstraRouter answered 2 queries and explored 1296.00 edges on average.
+DijkstraRouter spent 0.00s answering queries (2.00ms on average).
+DijkstraRouter answered 6 queries and explored 843.00 edges on average.
+DijkstraRouter spent 0.02s answering queries (3.50ms on average).
+DijkstraRouter answered 2 queries and explored 3614.00 edges on average.
+DijkstraRouter spent 0.01s answering queries (7.00ms on average).
+DijkstraRouter answered 6 queries and explored 3433.00 edges on average.
+DijkstraRouter spent 0.04s answering queries (7.17ms on average).
+DijkstraRouter answered 6 queries and explored 247.00 edges on average.
+DijkstraRouter spent 0.00s answering queries (0.50ms on average).
+DijkstraRouter answered 6 queries and explored 2647.00 edges on average.
+DijkstraRouter spent 0.03s answering queries (5.67ms on average).
+DijkstraRouter answered 6 queries and explored 3133.00 edges on average.
+DijkstraRouter spent 0.04s answering queries (6.67ms on average).
+DijkstraRouter answered 8 queries and explored 789.75 edges on average.
+DijkstraRouter spent 0.01s answering queries (1.62ms on average).
+DijkstraRouter answered 2 queries and explored 1981.00 edges on average.
+DijkstraRouter spent 0.01s answering queries (4.50ms on average).
+DijkstraRouter answered 56 queries and explored 2148.11 edges on average.
+DijkstraRouter spent 0.34s answering queries (6.02ms on average).
+DijkstraRouter answered 69 queries and explored 2365.30 edges on average.
+DijkstraRouter spent 0.31s answering queries (4.54ms on average).

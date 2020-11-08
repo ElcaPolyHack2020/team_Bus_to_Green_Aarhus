@@ -287,13 +287,16 @@ class PickUp(BusJob):
 class Bus:
     """A wrapper for a bus that can hold and queue tasks (=jobs)
     """
-    def __init__(self, id, start_edge, end_edge, bus_lane=0, type="BUS_L"):
+    def __init__(self, id, start_edge, end_edge, bus_lane=0, capacity=4,type="BUS_L"):
         self.id = id
         self.start_edge=start_edge
         self.end_edge=end_edge
         self.jobs = []
+        self.pedestrians = []
         self.bus_lane = bus_lane
         self.done=False
+        self.type=type
+        self.capacity=capacity
         self.current_target_edge=start_edge
         self.current_target_pos=1
         traci.vehicle.add(
@@ -374,7 +377,7 @@ class Bus:
 class FixedNBusesSimulation(_StageScorer):
     """Deploys N Buses 
     """
-    N_BUSES = 50
+    N_BUSES = 1
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.deployed_buses = set()
@@ -413,6 +416,17 @@ class OptimizedFixedNBusesSimulation(FixedNBusesSimulation):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.reserved_pedestrians = set()
+    
+    def get_best_distance_pedestrian(self, bus):
+        best_distance = None
+        best_p = None
+        for p in self.pedestrians:
+            if p.id not in self.reserved_pedestrians and "waiting" in traci.person.getStage(p.id).description:
+                distance=bus.get_distance(p.edge_from, p.position_from) + max(0, p.depart-time) * self.DEPARTURE_WEIGHT
+                if best_distance is None or -100000 <= distance < best_distance:
+                    best_distance = distance 
+                    best_p = p
+        return best_p
 
     def step(self, time):
         vehicles = set(traci.vehicle.getIDList())
@@ -420,6 +434,58 @@ class OptimizedFixedNBusesSimulation(FixedNBusesSimulation):
 
         for bus in self.deployed_buses:
             if bus.id in vehicles:
+                if len(bus.jobs) < 2:
+                    best_p = self.get_best_distance_pedestrian(bus)
+                    if best_p is not None:
+                        p = best_p
+                        self.reserved_pedestrians.add(p.id)
+                        bus.current_target_edge = p.edge_to
+                        bus.current_target_pos = p.position_to
+                        bus.jobs.append(MoveTo(p.edge_from, p.position_from, bus)) # Go to that passenger
+                        bus.jobs.append(IDLE(p.depart, bus)) # Wait until the passenger arrives
+                        bus.jobs.append(PickUp(p.edge_to, p.position_to, bus)) # Wait until the passenger arrives
+                        bus.jobs.append(MoveTo(p.edge_to, p.position_to, bus)) # Go to the destination
+                        bus.jobs.append(DropOff(bus)) # Let passenger exit
+                    elif len(self.pedestrians) == len(pedestrians): # all passenger reserved
+                        bus.jobs.append(MoveTo(bus.end_edge, 100, bus)) # Go home
+                        bus.done = True                
+                bus.step(time)
+        
+class MultipleCustomers(FixedNBusesSimulation):
+    """Deploys N Buses, chooses closest passenger next
+    """
+    DEPARTURE_WEIGHT=40
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.reserved_pedestrians = set()
+
+    def recalculate_route(self, bus):
+
+        
+    def step(self, time):
+        vehicles = set(traci.vehicle.getIDList())
+        pedestrians = set(traci.person.getIDList())
+
+        for bus in self.deployed_buses:
+            if bus.id in vehicles:
+                if len(bus.pedestrians) == 0:
+                    best_p = self.get_best_distance_pedestrian(bus)
+                    if best_p is not None:
+                        bus.jobs.append(MoveTo(p.edge_from, p.position_from, bus)) # Go to that passenger
+                        bus.jobs.append(IDLE(p.depart, bus)) # Wait until the passenger arrives
+                        bus.jobs.append(PickUp(p.edge_to, p.position_to, bus)) # Wait until the passenger arrives
+                        bus.pedestrians.append(best_p)
+                elif traci.vehicle.getPersonNumber(bus.id) < bus.capacity:
+                    edge = bus.get_edge()
+                    for p in self.pedestrians:
+                        pass
+                    """
+
+
+
+
+
+
                 if len(bus.jobs) < 2:
                     best_distance = None
                     best_p = None
@@ -443,4 +509,7 @@ class OptimizedFixedNBusesSimulation(FixedNBusesSimulation):
                     elif len(self.pedestrians) == len(pedestrians): # all passenger reserved
                         bus.jobs.append(MoveTo(bus.end_edge, 100, bus)) # Go home
                         bus.done = True                
+
+
                 bus.step(time)
+"""

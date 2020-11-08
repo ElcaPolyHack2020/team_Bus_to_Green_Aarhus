@@ -39,43 +39,6 @@ class _BaseSimulation:
         """
         pass
 
-    def output_file(self, time):
-        if time == 0:
-            with open("buses.csv", "w+") as f:
-                f.write("timestamp,ID,type,is_driving,is_parked,n_passengers,total_km\n")
-        else:
-            with open("buses.csv", "a") as f:
-                for id in traci.vehicle.getIDList():
-                    if id.startswith("bus"):                    
-                        f.write(",".join([
-                            str(time),
-                            id,
-                            traci.vehicle.getTypeID(id),
-                            "0" if traci.vehicle.isStopped(id) else "1",
-                            "1" if traci.vehicle.isStoppedParking(id) else "0",
-                            str(traci.vehicle.getPersonNumber(id)),
-                            str(traci.vehicle.getDistance(id))
-                            ])+"\n")
-
-        if time == 0:
-            with open("pedestrians.csv", "w+") as f:
-                f.write("timestamp,ID,status_id,status,edge_start,pos_start,edge_end,pos_end\n")
-        else:
-            with open("pedestrians.csv", "a") as f:
-                for p in self.pedestrians:
-                    f.write(",".join([
-                            str(time),
-                            p.id,
-                            traci.person.getStage(p.id),
-                            traci.person.getStage(p.id).description,
-                            self.pedestrians
-                            traci.vehicle.getTypeID(id),
-                            "0" if traci.vehicle.isStopped(id) else "1",
-                            "1" if traci.vehicle.isStoppedParking(id) else "0",
-                            str(traci.vehicle.getPersonNumber(id)),
-                            str(traci.vehicle.getDistance(id))
-                            ])+"\n")
-
     def run(self, output=False):
         # Initialize our algorithms
         self.setup()
@@ -84,9 +47,6 @@ class _BaseSimulation:
             traci.simulationStep()
             # Do the next task
             self.step(time)
-            # Outputs data to csv
-            if output:
-                self.output_file(time)
             # Update the stats that we use for scoring
             self.update_stats()
 
@@ -377,7 +337,7 @@ class Bus:
 class FixedNBusesSimulation(_StageScorer):
     """Deploys N Buses 
     """
-    N_BUSES = 1
+    N_BUSES = 32
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.deployed_buses = set()
@@ -458,8 +418,6 @@ class MultipleCustomers(FixedNBusesSimulation):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.reserved_pedestrians = set()
-
-    def recalculate_route(self, bus):
 
         
     def step(self, time):

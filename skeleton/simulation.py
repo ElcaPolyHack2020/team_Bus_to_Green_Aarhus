@@ -254,6 +254,8 @@ class Bus:
         self.jobs = []
         self.bus_lane = bus_lane
         self.done=False
+        self.current_target_edge=start_edge
+        self.current_target_pos=1
         traci.vehicle.add(
             vehID=self.id,
             typeID=type,
@@ -269,6 +271,9 @@ class Bus:
 
     def get_edge(self):
         return traci.vehicle.getRoadID(self.id)
+    
+    def get_distance(self, edge, pos):
+        return traci.simulation.getDistanceRoad(self.current_target_edge, self.current_target_pos, edge, pos)
 
     def get_lane(self):
         return traci.vehicle.getLaneID(self.id)
@@ -278,6 +283,7 @@ class Bus:
 
     def is_stopped(self):
         return traci.vehicle.isStopped(self.id)
+
 
     def move_to(self, edge, stop_pos=None):
         """Moves to a given edge and stop position. It will try to go in a circle if the target edge is downstream. I hate that I
@@ -324,7 +330,7 @@ class Bus:
             self.jobs[0].step(time)
         else:
             traci.vehicle.remove(self.id)
-            
+
 class FixedNBusesSimulation(_StageScorer):
     """Deploys N Buses 
     """
@@ -360,3 +366,41 @@ class FixedNBusesSimulation(_StageScorer):
                         bus.done = True                
                 bus.step(time)
 
+class OptimizedFixedNBusesSimulation(FixedNBusesSimulation):
+    """Deploys N Buses, chooses closest passenger next
+    """
+    DEPARTURE_WEIGHT=40
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.reserved_pedestrians = set()
+
+    def step(self, time):
+        vehicles = set(traci.vehicle.getIDList())
+        pedestrians = set(traci.person.getIDList())
+
+        for bus in self.deployed_buses:
+            if bus.id in vehicles:
+                if len(bus.jobs) < 3:
+                    best_distance = None
+                    best_p = None
+                    for p in self.pedestrians:
+                        if p.id in pedestrians and p.id not in self.reserved_pedestrians and "waiting" in traci.person.getStage(p.id).description:
+                            distance=bus.get_distance(p.edge_from, p.position_from) - p.depart * DEPARTURE_WEIGHT
+                            if best_distance is None or -100000 <= distance < best_distance:
+                                best_distance = distance 
+                                best_p = p
+                    if best_distance is not None:
+                        print("Best", best_distance, best_p.id, bus.id)
+                        p = best_p
+                        self.reserved_pedestrians.add(p.id)
+                        bus.current_target_edge = p.edge_to
+                        bus.current_target_pos = p.position_to
+                        bus.jobs.append(MoveTo(p.edge_from, p.position_from, bus)) # Go to that passenger
+                        bus.jobs.append(IDLE(p.depart, bus)) # Wait until the passenger arrives
+                        bus.jobs.append(PickUp(p.edge_to, p.position_to, bus)) # Wait until the passenger arrives
+                        bus.jobs.append(MoveTo(p.edge_to, p.position_to, bus)) # Go to the destination
+                        bus.jobs.append(DropOff(bus)) # Let passenger exit
+                    elif len(self.pedestrians) == len(pedestrians): # all passenger reserved
+                        bus.jobs.append(MoveTo(bus.end_edge, 100, bus)) # Go home
+                        bus.done = True                
+                bus.step(time)

@@ -18,7 +18,7 @@ This is the heart of our project, the agent that steers the buses around the str
 - `BusJob`: Our buses can have a queue of tasks(=jobs), that they perform. This is the base class for such a task, which is implemented by the following tasks
 - `MoveTo`: This moves the bus to a given edge at a given position. It is "smart" in a way that it can also go to locations that are not downstream of the current location by rerouting the bus around corners and dead ends.  
 ![Bus Deadend](results/bus.gif)
-- `IDLE`: This tells our bus to park on the side of the road. That way the bus does not produce any emissions and cars can still pass. We do that whenever we don't have anything else to do and it is also used to wait at passengers departure position in advance to reduce waiting times.
+- `IDLE`: This tells our bus to park on the side of the road. That way the bus does not produce any emissions and cars can still pass. We do that whenever we don't have anything else to do and it is also used to wait at passengers departure position in advance to reduce waiting times. The video below is in super slow motion as the bus is so fast at picking up new passengers.
 ![IDLE](results/idle.gif)
 
 - `DropOff`: This drops a passenger off if the bus is at the correct location and a passenger is on the bus.

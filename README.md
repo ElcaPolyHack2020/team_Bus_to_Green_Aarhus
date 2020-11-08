@@ -25,3 +25,6 @@ All of this leads us to our two agents:
 ## [quicktests.py](quicktests.py)
 This is a script that tests our submission on a small scaled random network. This was very helpful for quick evaluation 
 This is a little test project I created that generates random cityscapes with car and passenger traffic. This might help as a "clean" benchmark for measuring our algorithms performance.
+
+## [slowtests.py](quicktests.py)
+This is a script that tests our submission on the full Aarhus map, while still running our evaluation and returning a nice score.

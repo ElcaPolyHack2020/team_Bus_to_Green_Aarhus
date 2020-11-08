@@ -1,6 +1,9 @@
 # ELCA-Challenge: Bus To Green Aarhus
 This is the repository for the PolyHack Hackathon 2020 of the team "bus to green aarhus"
 
+# WebApp
+We decided the best way to show the magnitude of the problem is through an interactive Web App, where we show our results. This can be found at https://aarhus-mobility.herokuapp.com/
+
 ## Files
 ## [main.py](main.py)
 This is the normal main.py file that was provided by ELCA. It is just slightly adapted to run on other operating systems
